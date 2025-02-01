@@ -3,7 +3,8 @@ spring:
     compose:
       enabled: false
   application:
-    name: FashionShop
+    name: fashionShop-service
+
   datasource:
     url: "jdbc:mysql://localhost:3306/fashion_shop"
     driver-class-name: com.mysql.jdbc.Driver
@@ -21,5 +22,10 @@ spring:
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
+    enabled: true
   api-docs:
     path: /v3/api-docs
+
+jwt:
+  signerKey: "Nl0EwgZ2zY7r2lfXYJOUguERWZkvn3KDPu6pK+9EWFMsqCfywwzmhViCGawL2qQN"
+
