@@ -1,9 +1,7 @@
 package org.ptithcm2021.fashionshop.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,10 +18,13 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
+    @Column(unique = true)
     private String phone;
-    @Min(value = 5)
+    @Size(min = 5, message = "Password must be greater than 5 characters")
     @NotBlank(message = "Password cannot be blank")
     private String password;
+    @Column(unique = true)
+    @Email(message = "Email is not in correct format")
     private String email;
     private String fullname;
     @Enumerated(EnumType.STRING)

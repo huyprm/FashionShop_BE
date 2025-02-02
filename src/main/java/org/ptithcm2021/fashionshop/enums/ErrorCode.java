@@ -5,6 +5,7 @@ import lombok.Setter;
 import org.springframework.http.HttpStatus;
 @Getter
 public enum ErrorCode {
+
     USER_NOT_FOUND (1001, "User not found", HttpStatus.NOT_FOUND),
     USER_ALREADY_EXISTS (1002, "User already exists", HttpStatus.CONFLICT),
     WRONG_PASSWORD (1003, "Wrong password", HttpStatus.UNAUTHORIZED),

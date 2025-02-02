@@ -20,6 +20,7 @@ public class InitializeData {
     private final PasswordEncoder passwordEncoder;
 
     @Bean
+    @Transactional
     ApplicationRunner init() {
         return args -> {
             // Initialize roles
@@ -38,6 +39,7 @@ public class InitializeData {
 
                 User user = new User();
                 user.setEmail("huydlx@gmail.com");
+                user.setFullname("MyAdmin");
                 user.setPassword(passwordEncoder.encode("12345"));
                 user.setRole(adminRole);
                 userRepository.save(user);

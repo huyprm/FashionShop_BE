@@ -4,9 +4,8 @@ spring:
       enabled: false
   application:
     name: fashionShop-service
-
   datasource:
-    url: "jdbc:mysql://localhost:3306/fashion_shop"
+    url: "jdbc:mysql://localhost:3306/fashionShop"
     driver-class-name: com.mysql.jdbc.Driver
     username: root
     password: 12345
@@ -14,11 +13,13 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+
   servlet:
     multipart:
       enabled: true
       max-request-size: 5MB
       max-file-size: 5MB
+
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
@@ -28,4 +29,5 @@ springdoc:
 
 jwt:
   signerKey: "Nl0EwgZ2zY7r2lfXYJOUguERWZkvn3KDPu6pK+9EWFMsqCfywwzmhViCGawL2qQN"
+
 

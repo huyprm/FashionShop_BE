@@ -11,8 +11,12 @@ import org.ptithcm2021.fashionshop.exception.AppException;
 import org.ptithcm2021.fashionshop.model.User;
 import org.ptithcm2021.fashionshop.repository.UserRepository;
 import org.ptithcm2021.fashionshop.service.AuthenticationService;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.security.Security;
 
 @Slf4j
 @RestController
@@ -25,8 +29,10 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     public ApiResponse<AuthenticationResponse> login(@RequestBody @Valid LoginRequest loginRequest) throws Exception {
+        AuthenticationResponse authenticationResponse = authenticationService.login(loginRequest);
+
         return ApiResponse.<AuthenticationResponse>builder()
-                .data(authenticationService.login(loginRequest))
+                .data(authenticationResponse)
                 .build();
     }
     @PostMapping("/refresh")
@@ -37,7 +43,7 @@ public class AuthenticationController {
         User user = userRepository.findByEmail(mail).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
         //check token revoked
-        //compare id token
+        if(!user.getRefreshToken().equals(refreshToken)) throw new AppException(ErrorCode.INVALID_JWT);
 
         String refresh = authenticationService.generateRefreshToken(user);
         user.setRefreshToken(refreshToken);
@@ -52,15 +58,23 @@ public class AuthenticationController {
                 .data(authenticationResponse)
                 .build();
     }
-    public ApiResponse<Void> changePassword(String oldPassword, String newPassword) {
+    @GetMapping("/logout")
+    public ApiResponse<String> logout() throws Exception {
+        var authen= SecurityContextHolder.getContext().getAuthentication();
+        authenticationService.handleRefreshToken(authen.getName());
+        return ApiResponse.<String>builder().data("Success").build();
+    }
 
-        return null;
-    }
-    public ApiResponse<String> register(String username, String password) {
-        return null;
-    }
 
-    public ApiResponse<String> verifyEmai(LoginRequest loginRequest) {
-        return null;
-    }
+public ApiResponse<Void> changePassword(String oldPassword, String newPassword) {
+
+    return null;
+}
+public ApiResponse<String> register(String username, String password) {
+    return null;
+}
+
+public ApiResponse<String> verifyEmai(LoginRequest loginRequest) {
+    return null;
+}
 }

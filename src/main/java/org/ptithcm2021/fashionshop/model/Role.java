@@ -12,8 +12,6 @@ import org.ptithcm2021.fashionshop.enums.RoleEnum;
 @Builder
 public class Role {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private RoleEnum role;
