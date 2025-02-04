@@ -6,20 +6,21 @@ import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import jakarta.transaction.Transactional;
-import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
+import org.ptithcm2021.fashionshop.FashionShopApplication;
+import org.ptithcm2021.fashionshop.dto.request.EmailRequest;
 import org.ptithcm2021.fashionshop.dto.request.LoginRequest;
 import org.ptithcm2021.fashionshop.dto.response.AuthenticationResponse;
-import org.ptithcm2021.fashionshop.enums.ErrorCode;
+import org.ptithcm2021.fashionshop.enums.UserStatusEnum;
+import org.ptithcm2021.fashionshop.exception.ErrorCode;
 import org.ptithcm2021.fashionshop.exception.AppException;
 import org.ptithcm2021.fashionshop.model.User;
 import org.ptithcm2021.fashionshop.repository.UserRepository;
+import org.ptithcm2021.fashionshop.util.SendEmail;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.TransactionSystemException;
 
 import java.text.ParseException;
 import java.time.Instant;
@@ -52,6 +53,8 @@ public class AuthenticationService {
 
         boolean checkpassword = passwordEncoder.matches(loginRequest.getPassword(),user.getPassword());
         if(!checkpassword) throw new AppException(ErrorCode.WRONG_PASSWORD);
+
+        if(user.getStatus().equals(UserStatusEnum.PENDING)) throw new AppException((ErrorCode.ACCOUNT_LOCKED));
 
         String refreshToken = generateRefreshToken(user);
         String accessToken = generateAccessToken(user);
@@ -137,6 +140,29 @@ public class AuthenticationService {
         User user = userRepository.findByEmail(email).orElseThrow(()-> new AppException(ErrorCode.USER_NOT_FOUND));
 
         user.setRefreshToken(null);
+        userRepository.save(user);
+    }
+
+    public void sendVerificationEmail(String email){
+        EmailRequest emailRequest = new EmailRequest();
+        log.info(email);
+        User user = userRepository.findByEmail(email).orElseThrow(()-> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        String verificationUrl = "http://localhost:8080/api/auth/verifyEmail?token=" + user.getRefreshToken();
+
+        emailRequest.setTo(user.getEmail());
+        emailRequest.setSubject(user.getEmail());
+        emailRequest.setBody("Click this link to verify your email: " + verificationUrl);
+
+        SendEmail.sendEmail(emailRequest);
+    }
+
+    @Transactional
+    public void verificationEmail(String token){
+        User user = userRepository.findByRefreshToken(token).orElseThrow(()-> new AppException(ErrorCode.INVALID_JWT));
+        if(user.getRefreshToken().isEmpty()) throw new AppException(ErrorCode.INVALID_JWT);
+        user.setRefreshToken(null);
+        user.setStatus(UserStatusEnum.ACTIVE);
         userRepository.save(user);
     }
 }

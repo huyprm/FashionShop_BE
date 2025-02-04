@@ -1,7 +1,6 @@
 package org.ptithcm2021.fashionshop.exception;
 
 import org.ptithcm2021.fashionshop.dto.response.ApiResponse;
-import org.ptithcm2021.fashionshop.enums.ErrorCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;

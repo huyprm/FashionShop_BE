@@ -4,11 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.hibernate.type.descriptor.java.ObjectJavaType;
 import org.ptithcm2021.fashionshop.dto.response.ApiResponse;
-import org.ptithcm2021.fashionshop.enums.ErrorCode;
+import org.ptithcm2021.fashionshop.exception.ErrorCode;
 import org.springframework.http.MediaType;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 

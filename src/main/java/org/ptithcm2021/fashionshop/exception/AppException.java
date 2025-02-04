@@ -1,7 +1,5 @@
 package org.ptithcm2021.fashionshop.exception;
 
-import org.ptithcm2021.fashionshop.enums.ErrorCode;
-
 public class AppException extends RuntimeException {
 
     public AppException(ErrorCode errorCode) {

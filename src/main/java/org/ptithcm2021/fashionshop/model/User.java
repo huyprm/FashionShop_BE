@@ -18,7 +18,7 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
-    @Column(unique = true)
+    @Column(unique = false)
     private String phone;
     @Size(min = 5, message = "Password must be greater than 5 characters")
     @NotBlank(message = "Password cannot be blank")
@@ -27,11 +27,15 @@ public class User {
     @Email(message = "Email is not in correct format")
     private String email;
     private String fullname;
+    private String address;
+    private String birthday;
+    private String gender;
+    private String img;
     @Enumerated(EnumType.STRING)
     private UserStatusEnum status = UserStatusEnum.PENDING;
     @Column(columnDefinition = "text")
     private String refreshToken;
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "role_id")
     private Role role;
 }

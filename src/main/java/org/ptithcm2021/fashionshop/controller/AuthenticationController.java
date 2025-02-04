@@ -6,22 +6,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.ptithcm2021.fashionshop.dto.request.LoginRequest;
 import org.ptithcm2021.fashionshop.dto.response.ApiResponse;
 import org.ptithcm2021.fashionshop.dto.response.AuthenticationResponse;
-import org.ptithcm2021.fashionshop.enums.ErrorCode;
+import org.ptithcm2021.fashionshop.exception.ErrorCode;
 import org.ptithcm2021.fashionshop.exception.AppException;
 import org.ptithcm2021.fashionshop.model.User;
 import org.ptithcm2021.fashionshop.repository.UserRepository;
 import org.ptithcm2021.fashionshop.service.AuthenticationService;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.security.Security;
 
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/auth")
+@RequestMapping("api/auth")
 
 public class AuthenticationController {
     private final AuthenticationService authenticationService;
@@ -70,11 +66,19 @@ public ApiResponse<Void> changePassword(String oldPassword, String newPassword) 
 
     return null;
 }
+
 public ApiResponse<String> register(String username, String password) {
     return null;
 }
+    @GetMapping("/verifyEmail")
+    public ApiResponse<String> verifyEmai(@RequestParam String token) {
+        authenticationService.verificationEmail(token);
+        return ApiResponse.<String>builder().data("Successfull authenticaiton").build();
+    }
 
-public ApiResponse<String> verifyEmai(LoginRequest loginRequest) {
-    return null;
-}
+    @PostMapping("/verifyEmail/{email}")
+    public ApiResponse<Void> sendVerifyEmai(@PathVariable String email) {
+        authenticationService.sendVerificationEmail(email);
+        return ApiResponse.<Void>builder().build();
+    }
 }

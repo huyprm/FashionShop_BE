@@ -1,7 +1,6 @@
-package org.ptithcm2021.fashionshop.enums;
+package org.ptithcm2021.fashionshop.exception;
 
 import lombok.Getter;
-import lombok.Setter;
 import org.springframework.http.HttpStatus;
 @Getter
 public enum ErrorCode {
@@ -11,6 +10,7 @@ public enum ErrorCode {
     WRONG_PASSWORD (1003, "Wrong password", HttpStatus.UNAUTHORIZED),
     INVALID_JWT (1004, "Invalid JWT", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZED (1005, "Unauthorized", HttpStatus.UNAUTHORIZED),
+    ACCOUNT_LOCKED (1006, "Account has not been verified", HttpStatus.CONFLICT),
 ;
 
     ErrorCode(int code, String message, HttpStatus httpStatus) {

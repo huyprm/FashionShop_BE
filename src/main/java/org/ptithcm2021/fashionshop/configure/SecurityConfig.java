@@ -32,11 +32,15 @@ public class SecurityConfig {
     @Value("${jwt.signerKey}")
     private String signKey;
     private static final String[] PUBLIC_ENDPOINTS = {
-            "/auth/login"
+            "/api/auth/login",
+            "/api/auth/verifyEmail/{email}",
+            "/api/users/register"
+
     };
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(authorizeRequests -> authorizeRequests
+                        .requestMatchers(HttpMethod.GET, "/api/auth/verifyEmail").permitAll()
                         .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
                         .requestMatchers(
                                 "/swagger-ui/**",  // Swagger UI
