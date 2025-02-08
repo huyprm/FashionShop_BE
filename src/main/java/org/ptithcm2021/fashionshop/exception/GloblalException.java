@@ -1,6 +1,7 @@
 package org.ptithcm2021.fashionshop.exception;
 
 import org.ptithcm2021.fashionshop.dto.response.ApiResponse;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -37,6 +38,14 @@ public class GloblalException {
         apiResponse.setMessage(e.getBindingResult().getFieldError().getDefaultMessage());
         apiResponse.setCode(400);
 
+        return ResponseEntity.badRequest().body(apiResponse);
+    }
+
+    @ExceptionHandler(value = DataIntegrityViolationException.class)
+    ResponseEntity<ApiResponse> handlingDataIntegrityViolationException(DataIntegrityViolationException e) {
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setMessage(e.getMessage());
+        apiResponse.setCode(400);
         return ResponseEntity.badRequest().body(apiResponse);
     }
 }

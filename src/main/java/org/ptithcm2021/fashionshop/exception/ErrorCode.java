@@ -11,6 +11,7 @@ public enum ErrorCode {
     INVALID_JWT (1004, "Invalid JWT", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZED (1005, "Unauthorized", HttpStatus.UNAUTHORIZED),
     ACCOUNT_LOCKED (1006, "Account has not been verified", HttpStatus.CONFLICT),
+
 ;
 
     ErrorCode(int code, String message, HttpStatus httpStatus) {

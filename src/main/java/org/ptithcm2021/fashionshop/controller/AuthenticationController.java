@@ -67,9 +67,6 @@ public ApiResponse<Void> changePassword(String oldPassword, String newPassword) 
     return null;
 }
 
-public ApiResponse<String> register(String username, String password) {
-    return null;
-}
     @GetMapping("/verifyEmail")
     public ApiResponse<String> verifyEmai(@RequestParam String token) {
         authenticationService.verificationEmail(token);

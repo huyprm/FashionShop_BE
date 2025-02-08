@@ -38,7 +38,6 @@ public class AuthenticationService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    @Transactional
     public AuthenticationResponse login (LoginRequest loginRequest) throws Exception {
         String emailRegex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
         User user = new User();
@@ -73,7 +72,7 @@ public class AuthenticationService {
     public String generateAccessToken(User user) throws Exception {
         JWSHeader jwsHeader = new JWSHeader.Builder(JWSAlgorithm.HS512).type(JOSEObjectType.JWT).build();
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
-                .subject(user.getEmail())
+                .subject(user.getId())
                 .issuer("fashionshop.com")
                 .issueTime(new Date())
                 .expirationTime(new Date(Instant.now().plus(3600, ChronoUnit.SECONDS).toEpochMilli()))
@@ -100,7 +99,7 @@ public class AuthenticationService {
         JWSHeader  jwsHeader = new JWSHeader.Builder(JWSAlgorithm.HS512).type(JOSEObjectType.JWT).build();
 
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
-                .subject(user.getEmail())
+                .subject(user.getId())
                 .issuer("fashionshop.com")
                 .issueTime(new Date())
                 .expirationTime(new Date(Instant.now().plus(86400, ChronoUnit.SECONDS).toEpochMilli()))
@@ -135,9 +134,9 @@ public class AuthenticationService {
         return true;
     }
 
-    @Transactional
-    public void handleRefreshToken(String email) throws Exception {
-        User user = userRepository.findByEmail(email).orElseThrow(()-> new AppException(ErrorCode.USER_NOT_FOUND));
+
+    public void handleRefreshToken(String id) throws Exception {
+        User user = userRepository.findById(id).orElseThrow(()->new AppException(ErrorCode.USER_NOT_FOUND));
 
         user.setRefreshToken(null);
         userRepository.save(user);
@@ -145,7 +144,6 @@ public class AuthenticationService {
 
     public void sendVerificationEmail(String email){
         EmailRequest emailRequest = new EmailRequest();
-        log.info(email);
         User user = userRepository.findByEmail(email).orElseThrow(()-> new AppException(ErrorCode.USER_NOT_FOUND));
 
         String verificationUrl = "http://localhost:8080/api/auth/verifyEmail?token=" + user.getRefreshToken();
@@ -157,7 +155,6 @@ public class AuthenticationService {
         SendEmail.sendEmail(emailRequest);
     }
 
-    @Transactional
     public void verificationEmail(String token){
         User user = userRepository.findByRefreshToken(token).orElseThrow(()-> new AppException(ErrorCode.INVALID_JWT));
         if(user.getRefreshToken().isEmpty()) throw new AppException(ErrorCode.INVALID_JWT);

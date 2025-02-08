@@ -25,7 +25,7 @@ public class SendEmail {
         message.setTo(emailRequest.getTo());
         message.setSubject(emailRequest.getSubject());
         message.setText(emailRequest.getBody());
-        log.info("Sending email: {}", message.toString());
+
 
         mailSender.send(message);
         return "Email sent";
