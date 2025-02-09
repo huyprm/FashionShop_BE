@@ -29,14 +29,14 @@ public class InitializeData {
             if (roleRepository.count() == 0) {
                 for (RoleEnum roleEnum : RoleEnum.values()) {
                         Role role = new Role();
-                        role.setRole(roleEnum);
+                        role.setRole(roleEnum.toString());
                         role.setDescription(roleEnum.getDescription());
                         roleRepository.save(role);
                 }
             }
 
             if (userRepository.findByEmail("huydlx@gmail.com").isEmpty()) {
-                Role adminRole = roleRepository.findByRole(RoleEnum.ADMIN)
+                Role adminRole = roleRepository.findById(RoleEnum.ADMIN.toString())
                         .orElseThrow(() -> new IllegalStateException("ADMIN role not found"));
 
                 User user = new User();

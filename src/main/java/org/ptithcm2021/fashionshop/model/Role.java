@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.ptithcm2021.fashionshop.enums.RoleEnum;
 
-@Entity(name ="role")
+import java.util.List;
+
+@Entity(name ="roles")
 @Getter
 @Setter
 @AllArgsConstructor
@@ -12,10 +14,9 @@ import org.ptithcm2021.fashionshop.enums.RoleEnum;
 @Builder
 public class Role {
     @Id
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private RoleEnum role;
+    private String role;
     @Column(nullable = false)
     private String description;
-
+    @OneToMany(mappedBy = "role", cascade = CascadeType.PERSIST)
+    private List<User> users;
 }

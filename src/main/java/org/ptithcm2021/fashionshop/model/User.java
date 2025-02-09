@@ -8,8 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.ptithcm2021.fashionshop.enums.UserStatusEnum;
 
-@Entity
-@Table(name = "user")
+@Entity(name = "users")
 @Getter
 @Setter
 @AllArgsConstructor
@@ -18,7 +17,6 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
-    @Column(unique = false)
     private String phone;
     @Size(min = 5, message = "Password must be greater than 5 characters")
     @NotBlank(message = "Password cannot be blank")

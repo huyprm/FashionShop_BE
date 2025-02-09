@@ -47,13 +47,13 @@ public class UserController {
         return ApiResponse.<UserResponse>builder().data( userService.updateUser(id, userUpdateRequest)).build();
     }
 
-    @PostMapping("/{id}/delete")
+    @DeleteMapping("/{id}")
     public ApiResponse<Void> deleteUser(@PathVariable String id) {
         userService.deleteUser(id);
     return ApiResponse.<Void>builder().message("Successfull").build();
     }
 
-    @PostMapping("/{id}/change_password")
+    @PutMapping("/{id}/change_password")
     public ApiResponse<Void> ChangePassword(@RequestBody @Valid UserChangePasswordRequest userChangePasswordRequest,
                                             @PathVariable String id) {
         return ApiResponse.<Void>builder().message(userService.changePassword(userChangePasswordRequest, id)).build();

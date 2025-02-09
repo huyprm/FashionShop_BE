@@ -43,9 +43,12 @@ public class GloblalException {
 
     @ExceptionHandler(value = DataIntegrityViolationException.class)
     ResponseEntity<ApiResponse> handlingDataIntegrityViolationException(DataIntegrityViolationException e) {
-        ApiResponse apiResponse = new ApiResponse();
-        apiResponse.setMessage(e.getMessage());
-        apiResponse.setCode(400);
+
+        ErrorCode errorCode = ErrorCode.DATA_INVALID;
+        ApiResponse apiResponse = ApiResponse.builder()
+                .code(errorCode.getCode())
+                .message(errorCode.getMessage())
+                .build();
         return ResponseEntity.badRequest().body(apiResponse);
     }
 }

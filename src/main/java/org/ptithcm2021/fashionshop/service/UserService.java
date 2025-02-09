@@ -15,7 +15,6 @@ import org.ptithcm2021.fashionshop.model.Role;
 import org.ptithcm2021.fashionshop.model.User;
 import org.ptithcm2021.fashionshop.repository.UserRepository;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -37,7 +36,7 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setStatus(UserStatusEnum.PENDING);
         user.setRefreshToken(authenticationService.generateRefreshToken(user));
-        user.setRole(Role.builder().role(RoleEnum.CUSTOMER).build());
+        user.setRole(Role.builder().role(RoleEnum.CUSTOMER.toString()).build());
         userRepository.save(user);
         return userMapper.toUserResponse(user);
     }

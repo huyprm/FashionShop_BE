@@ -11,6 +11,10 @@ public enum ErrorCode {
     INVALID_JWT (1004, "Invalid JWT", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZED (1005, "Unauthorized", HttpStatus.UNAUTHORIZED),
     ACCOUNT_LOCKED (1006, "Account has not been verified", HttpStatus.CONFLICT),
+    BRAND_NOT_FOUND (1007, "Brand not found", HttpStatus.NOT_FOUND),
+    FORBIDDEN (1008, "Forbidden", HttpStatus.FORBIDDEN),
+    ROLE_NOT_FOUND (1009, "Role not found", HttpStatus.NOT_FOUND),
+    DATA_INVALID (1010, "Data invalid", HttpStatus.CONFLICT),
 
 ;
 
