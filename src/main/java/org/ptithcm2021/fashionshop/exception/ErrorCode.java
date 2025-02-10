@@ -15,7 +15,8 @@ public enum ErrorCode {
     FORBIDDEN (1008, "Forbidden", HttpStatus.FORBIDDEN),
     ROLE_NOT_FOUND (1009, "Role not found", HttpStatus.NOT_FOUND),
     DATA_INVALID (1010, "Data invalid", HttpStatus.CONFLICT),
-
+    CATEGORY_NOT_FOUND (1011, "Category not found", HttpStatus.NOT_FOUND),
+    PRODUCT_NOT_FOUND (1012, "Product not found", HttpStatus.NOT_FOUND),
 ;
 
     ErrorCode(int code, String message, HttpStatus httpStatus) {

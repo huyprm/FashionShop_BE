@@ -1,16 +1,20 @@
 package org.ptithcm2021.fashionshop.dto.response;
 
+import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class BrandResponse {
+@Builder
+public class ProductVariantResponse {
     private int id;
-    private String name;
-    private String description;
+    private int quantity;
+    private double price;
+    private String image;
+    private String color;
+    private String size;
 }

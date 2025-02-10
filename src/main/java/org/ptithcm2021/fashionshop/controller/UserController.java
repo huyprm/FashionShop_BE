@@ -54,8 +54,13 @@ public class UserController {
     }
 
     @PutMapping("/{id}/change_password")
-    public ApiResponse<Void> ChangePassword(@RequestBody @Valid UserChangePasswordRequest userChangePasswordRequest,
+    public ApiResponse<Void> changePassword(@RequestBody @Valid UserChangePasswordRequest userChangePasswordRequest,
                                             @PathVariable String id) {
         return ApiResponse.<Void>builder().message(userService.changePassword(userChangePasswordRequest, id)).build();
+    }
+
+    @PutMapping("/{id}/change_role")
+    public ApiResponse<UserResponse> changeRoleUser(@PathVariable String id, @RequestParam String role) {
+        return ApiResponse.<UserResponse>builder().data(userService.changeRoleUser(id, role)).build();
     }
 }

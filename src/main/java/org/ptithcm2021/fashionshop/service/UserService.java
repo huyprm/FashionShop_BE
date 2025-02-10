@@ -13,6 +13,7 @@ import org.ptithcm2021.fashionshop.exception.ErrorCode;
 import org.ptithcm2021.fashionshop.mapper.UserMapper;
 import org.ptithcm2021.fashionshop.model.Role;
 import org.ptithcm2021.fashionshop.model.User;
+import org.ptithcm2021.fashionshop.repository.RoleRepository;
 import org.ptithcm2021.fashionshop.repository.UserRepository;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -29,6 +30,8 @@ public class UserService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationService authenticationService;
+    private final RoleService roleService;
+    private final RoleRepository roleRepository;
 
     public UserResponse createUser(UserRegisterRequest userRegisterRequest) throws Exception {
         User user = userMapper.toUser(userRegisterRequest);
@@ -103,5 +106,15 @@ public class UserService {
 
         userRepository.save(user);
         return "Changed password successfully";
+    }
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public UserResponse changeRoleUser(String id, String roleId){
+        User user = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        Role role = roleRepository.findById(roleId).orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
+        user.setRole(role);
+        userRepository.save(user);
+        return userMapper.toUserResponse(user);
     }
 }

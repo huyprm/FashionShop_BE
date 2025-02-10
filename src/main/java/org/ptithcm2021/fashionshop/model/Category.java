@@ -1,5 +1,6 @@
 package org.ptithcm2021.fashionshop.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,6 +17,7 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     private String name;
+    @JsonIgnore
     @OneToMany(mappedBy = "category", cascade = CascadeType.PERSIST)
     private List<Product> products;
 }

@@ -1,5 +1,6 @@
 package org.ptithcm2021.fashionshop.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,6 +19,7 @@ public class Brand {
     private String name;
     @Column(columnDefinition = "text")
     private String description;
+    @JsonIgnore
     @OneToMany(mappedBy = "brand",cascade = CascadeType.ALL)
     private List<Product> products;
 }

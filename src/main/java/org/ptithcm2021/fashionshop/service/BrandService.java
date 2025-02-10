@@ -25,7 +25,7 @@ public class BrandService {
         Brand brand = brandRepository.save(newBrand);
 
         BrandResponse brandResponse = BrandResponse.builder()
-                .brandId(brand.getId())
+                .id(brand.getId())
                 .name(brand.getName())
                 .description(brand.getDescription())
                 .build();
@@ -41,7 +41,7 @@ public class BrandService {
         brandRepository.save(newBrand);
 
         BrandResponse brandResponse = BrandResponse.builder()
-                .brandId(newBrand.getId())
+                .id(newBrand.getId())
                 .name(newBrand.getName())
                 .description(newBrand.getDescription())
                 .build();
@@ -63,6 +63,7 @@ public class BrandService {
 
         brands.forEach(brand -> {
             brandResponses.add(BrandResponse.builder()
+                    .id(brand.getId())
                     .description(brand.getDescription())
                     .name(brand.getName()).build());
         });
@@ -74,12 +75,11 @@ public class BrandService {
         Brand brand = brandRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.BRAND_NOT_FOUND));
 
         BrandResponse brandResponse = BrandResponse.builder()
-                .brandId(brand.getId())
+                .id(brand.getId())
                 .name(brand.getName())
                 .description(brand.getDescription())
                 .build();
         return brandResponse;
     }
 
-    //get product
 }
