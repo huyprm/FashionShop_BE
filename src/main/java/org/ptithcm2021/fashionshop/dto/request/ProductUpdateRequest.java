@@ -5,6 +5,7 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.ptithcm2021.fashionshop.enums.ProductStatusEnum;
 
 import java.util.List;
 import java.util.Map;
@@ -22,5 +23,6 @@ public class ProductUpdateRequest {
     private int stock_quantity;
     private int category_id;
     private int brand_id;
+    private ProductStatusEnum status;
     private Map<Integer,ProductVariantRequest> productVariantList;
 }

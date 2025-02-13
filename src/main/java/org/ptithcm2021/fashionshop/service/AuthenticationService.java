@@ -10,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.ptithcm2021.fashionshop.dto.request.EmailRequest;
 import org.ptithcm2021.fashionshop.dto.request.LoginRequest;
 import org.ptithcm2021.fashionshop.dto.response.AuthenticationResponse;
-import org.ptithcm2021.fashionshop.enums.UserStatusEnum;
+import org.ptithcm2021.fashionshop.enums.AccountStatusEnum;
 import org.ptithcm2021.fashionshop.exception.ErrorCode;
 import org.ptithcm2021.fashionshop.exception.AppException;
 import org.ptithcm2021.fashionshop.model.User;
@@ -51,7 +51,7 @@ public class AuthenticationService {
         boolean checkpassword = passwordEncoder.matches(loginRequest.getPassword(),user.getPassword());
         if(!checkpassword) throw new AppException(ErrorCode.WRONG_PASSWORD);
 
-        if(user.getStatus().equals(UserStatusEnum.PENDING)) throw new AppException((ErrorCode.ACCOUNT_LOCKED));
+        if(user.getStatus().equals(AccountStatusEnum.PENDING)) throw new AppException((ErrorCode.ACCOUNT_LOCKED));
 
         String refreshToken = generateRefreshToken(user);
         String accessToken = generateAccessToken(user);
@@ -157,7 +157,7 @@ public class AuthenticationService {
         User user = userRepository.findByRefreshToken(token).orElseThrow(()-> new AppException(ErrorCode.INVALID_JWT));
         if(user.getRefreshToken().isEmpty()) throw new AppException(ErrorCode.INVALID_JWT);
         user.setRefreshToken(null);
-        user.setStatus(UserStatusEnum.ACTIVE);
+        user.setStatus(AccountStatusEnum.ACTIVE);
         userRepository.save(user);
     }
 }

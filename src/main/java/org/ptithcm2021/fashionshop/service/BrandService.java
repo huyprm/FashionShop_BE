@@ -7,6 +7,7 @@ import org.ptithcm2021.fashionshop.exception.AppException;
 import org.ptithcm2021.fashionshop.exception.ErrorCode;
 import org.ptithcm2021.fashionshop.model.Brand;
 import org.ptithcm2021.fashionshop.repository.BrandRepository;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ import java.util.List;
 public class BrandService {
     private final BrandRepository brandRepository;
 
+    @PreAuthorize("hasAuthority({'ADMIN','STAFF_WAREHOUSE'})")
     public BrandResponse crateBrand(BrandRequest brandRequest) {
         Brand newBrand = Brand.builder()
                 .name(brandRequest.getName())
@@ -32,6 +34,7 @@ public class BrandService {
         return brandResponse;
     }
 
+    @PreAuthorize("hasAuthority({'ADMIN','STAFF_WAREHOUSE'})")
     public BrandResponse updateBrand(BrandRequest brandRequest, int id) {
         Brand newBrand = brandRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.BRAND_NOT_FOUND));
 
@@ -49,6 +52,7 @@ public class BrandService {
         return brandResponse;
     }
 
+    @PreAuthorize("hasAuthority({'ADMIN','STAFF_WAREHOUSE'})")
     public String deleteBrand(int id) {
         Brand brand = brandRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.BRAND_NOT_FOUND));
         if (!brand.getProducts().isEmpty()) throw new AppException(ErrorCode.FORBIDDEN);

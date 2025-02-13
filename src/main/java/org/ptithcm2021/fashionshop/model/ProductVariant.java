@@ -11,7 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Product_variant {
+public class ProductVariant {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY )
     private int id;

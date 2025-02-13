@@ -15,10 +15,11 @@ import org.ptithcm2021.fashionshop.mapper.ProductMapper;
 import org.ptithcm2021.fashionshop.model.Brand;
 import org.ptithcm2021.fashionshop.model.Category;
 import org.ptithcm2021.fashionshop.model.Product;
-import org.ptithcm2021.fashionshop.model.Product_variant;
+import org.ptithcm2021.fashionshop.model.ProductVariant;
 import org.ptithcm2021.fashionshop.repository.BrandRepository;
 import org.ptithcm2021.fashionshop.repository.CategoryRepository;
 import org.ptithcm2021.fashionshop.repository.ProductRepository;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+
 public class ProductService {
     private final ProductRepository productRepository;
     private final BrandRepository brandRepository;
@@ -51,6 +53,7 @@ public class ProductService {
         return productResponse;
     }
 
+    @PreAuthorize("hasAuthority({'ADMIN','STAFF_WAREHOUSE'})")
     public ProductResponse addProduct(ProductRequest productRequest) {
         Brand brand = brandRepository.findById(productRequest.getBrand_id()).orElseThrow(() -> new AppException(ErrorCode.BRAND_NOT_FOUND));
         Category category = categoryRepository.findById(productRequest.getCategory_id()).orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
@@ -64,8 +67,8 @@ public class ProductService {
         product.setDescription(productRequest.getDescription());
         product.setStock_quantity(productRequest.getStock_quantity());
 
-        List<Product_variant> list = productRequest.getProductVariantList().stream().map(productVariantRequest ->{
-            Product_variant product_variant = Product_variant.builder()
+        List<ProductVariant> list = productRequest.getProductVariantList().stream().map(productVariantRequest ->{
+            ProductVariant product_variant = ProductVariant.builder()
                     .color(productVariantRequest.getColor())
                     .image(productVariantRequest.getImage())
                     .price(productVariantRequest.getPrice())
@@ -80,6 +83,7 @@ public class ProductService {
         return productMapper.toProductResponse(productRepository.save(product));
     }
 
+    @PreAuthorize("hasAuthority({'ADMIN','STAFF_WAREHOUSE'})")
     @Transactional
     public ProductResponse updateProduct(ProductUpdateRequest productRequest, int id) {
         Product product = productRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
@@ -98,7 +102,7 @@ public class ProductService {
 
            product.setCategory(category);
        }
-
+        product.setStatus(productRequest.getStatus());
         product.setDescription(productRequest.getDescription());
         product.setStock_quantity(productRequest.getStock_quantity());
 
@@ -136,6 +140,7 @@ public class ProductService {
         return products.stream().map(productMapper::toProductResponse).collect(Collectors.toList());
     }
 
+    @PreAuthorize("hasAuthority({'ADMIN','STAFF_WAREHOUSE'})")
     public String deleteProduct(int id) {
         Product product = productRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 

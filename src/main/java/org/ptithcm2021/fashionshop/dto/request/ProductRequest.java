@@ -1,14 +1,10 @@
 package org.ptithcm2021.fashionshop.dto.request;
 
-import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.ptithcm2021.fashionshop.model.Brand;
-import org.ptithcm2021.fashionshop.model.Category;
-import org.ptithcm2021.fashionshop.model.Product_variant;
 
 import java.util.List;
 

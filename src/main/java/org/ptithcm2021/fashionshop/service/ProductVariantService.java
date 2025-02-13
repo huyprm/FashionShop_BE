@@ -8,9 +8,10 @@ import org.ptithcm2021.fashionshop.exception.AppException;
 import org.ptithcm2021.fashionshop.exception.ErrorCode;
 import org.ptithcm2021.fashionshop.mapper.ProductVariantMapper;
 import org.ptithcm2021.fashionshop.model.Product;
-import org.ptithcm2021.fashionshop.model.Product_variant;
+import org.ptithcm2021.fashionshop.model.ProductVariant;
 import org.ptithcm2021.fashionshop.repository.ProductRepository;
 import org.ptithcm2021.fashionshop.repository.ProductVariantRepository;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@PreAuthorize("hasAuthority({'ADMIN','STAFF_WAREHOUSE'})")
 public class ProductVariantService {
     private final ProductVariantRepository productVariantRepository;
     private final ProductVariantMapper productVariantMapper;
@@ -27,9 +29,9 @@ public class ProductVariantService {
     public List<ProductVariantResponse> createProductVariants(List<ProductVariantRequest> productVariantRequests, int productId) {
         Product product = productRepository.findById(productId).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
-        List<Product_variant> list = productVariantRequests.stream()
+        List<ProductVariant> list = productVariantRequests.stream()
                 .map(productVariantRequest -> {
-                    Product_variant productVariant = productVariantMapper.toProductVariant(productVariantRequest);
+                    ProductVariant productVariant = productVariantMapper.toProductVariant(productVariantRequest);
                     productVariant.setProduct(product);
                     return productVariant;
                 }).toList();
@@ -41,9 +43,9 @@ public class ProductVariantService {
 
     @Transactional
     public List<ProductVariantResponse> updateProductVariant(Map<Integer, ProductVariantRequest> productVariantRequests) {
-        List<Product_variant> list = productVariantRequests.entrySet().stream()
+        List<ProductVariant> list = productVariantRequests.entrySet().stream()
                 .map(productVariantRequest ->{
-                    Product_variant productVariant = productVariantRepository.findById(productVariantRequest.getKey()).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+                    ProductVariant productVariant = productVariantRepository.findById(productVariantRequest.getKey()).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
                     productVariantMapper.updateProductVariant(productVariant, productVariantRequest.getValue());
                     return productVariant;

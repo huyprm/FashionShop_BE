@@ -7,7 +7,7 @@ import org.ptithcm2021.fashionshop.dto.request.UserRegisterRequest;
 import org.ptithcm2021.fashionshop.dto.request.UserUpdateRequest;
 import org.ptithcm2021.fashionshop.dto.response.UserResponse;
 import org.ptithcm2021.fashionshop.enums.RoleEnum;
-import org.ptithcm2021.fashionshop.enums.UserStatusEnum;
+import org.ptithcm2021.fashionshop.enums.AccountStatusEnum;
 import org.ptithcm2021.fashionshop.exception.AppException;
 import org.ptithcm2021.fashionshop.exception.ErrorCode;
 import org.ptithcm2021.fashionshop.mapper.UserMapper;
@@ -37,7 +37,7 @@ public class UserService {
         User user = userMapper.toUser(userRegisterRequest);
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setStatus(UserStatusEnum.PENDING);
+        user.setStatus(AccountStatusEnum.PENDING);
         user.setRefreshToken(authenticationService.generateRefreshToken(user));
         user.setRole(Role.builder().role(RoleEnum.CUSTOMER.toString()).build());
         userRepository.save(user);
@@ -75,7 +75,7 @@ public class UserService {
 
     public void deleteUser(String id) {
         User user = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-        user.setStatus(UserStatusEnum.CANCELED);
+        user.setStatus(AccountStatusEnum.CANCELED);
         userRepository.save(user);
     }
 

@@ -7,6 +7,7 @@ import org.ptithcm2021.fashionshop.exception.AppException;
 import org.ptithcm2021.fashionshop.exception.ErrorCode;
 import org.ptithcm2021.fashionshop.model.Category;
 import org.ptithcm2021.fashionshop.repository.CategoryRepository;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -15,9 +16,11 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+
 public class CategoryService {
     private final CategoryRepository categoryRepository;
 
+    @PreAuthorize("hasAuthority({'ADMIN','STAFF_WAREHOUSE'})")
     public CategoryResponse createCategory(CategoryRequest categoryRequest) {
         Category category = categoryRepository.save(Category.builder().name(categoryRequest.getName()).build());
 
@@ -51,6 +54,7 @@ public class CategoryService {
                 .build();
     }
 
+    @PreAuthorize("hasAuthority({'ADMIN','STAFF_WAREHOUSE'})")
     public CategoryResponse updateCategory(int id, CategoryRequest categoryRequest) {
         Category category = categoryRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
 
@@ -64,6 +68,7 @@ public class CategoryService {
                 .build();
     }
 
+    @PreAuthorize("hasAuthority({'ADMIN','STAFF_WAREHOUSE'})")
     public String deleteCategory(int id) {
         Category category = categoryRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
 
