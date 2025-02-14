@@ -53,8 +53,7 @@ public class ProductService {
         return productResponse;
     }
 
-    @PreAuthorize("hasAuthority({'ADMIN','STAFF_WAREHOUSE'})")
-    public ProductResponse addProduct(ProductRequest productRequest) {
+    @PreAuthorize("hasAnyAuthority('SCOPE_ADMIN','SCOPE_STAFF_WAREHOUSE')")    public ProductResponse addProduct(ProductRequest productRequest) {
         Brand brand = brandRepository.findById(productRequest.getBrand_id()).orElseThrow(() -> new AppException(ErrorCode.BRAND_NOT_FOUND));
         Category category = categoryRepository.findById(productRequest.getCategory_id()).orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
 
@@ -83,8 +82,7 @@ public class ProductService {
         return productMapper.toProductResponse(productRepository.save(product));
     }
 
-    @PreAuthorize("hasAuthority({'ADMIN','STAFF_WAREHOUSE'})")
-    @Transactional
+    @PreAuthorize("hasAnyAuthority('SCOPE_ADMIN','SCOPE_STAFF_WAREHOUSE')")    @Transactional
     public ProductResponse updateProduct(ProductUpdateRequest productRequest, int id) {
         Product product = productRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
@@ -140,8 +138,7 @@ public class ProductService {
         return products.stream().map(productMapper::toProductResponse).collect(Collectors.toList());
     }
 
-    @PreAuthorize("hasAuthority({'ADMIN','STAFF_WAREHOUSE'})")
-    public String deleteProduct(int id) {
+    @PreAuthorize("hasAnyAuthority('SCOPE_ADMIN','SCOPE_STAFF_WAREHOUSE')")    public String deleteProduct(int id) {
         Product product = productRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
         product.setStatus(ProductStatusEnum.DISCONTINUED);

@@ -18,8 +18,7 @@ import java.util.List;
 public class BrandService {
     private final BrandRepository brandRepository;
 
-    @PreAuthorize("hasAuthority({'ADMIN','STAFF_WAREHOUSE'})")
-    public BrandResponse crateBrand(BrandRequest brandRequest) {
+    @PreAuthorize("hasAnyAuthority('SCOPE_ADMIN','SCOPE_STAFF_WAREHOUSE')")    public BrandResponse crateBrand(BrandRequest brandRequest) {
         Brand newBrand = Brand.builder()
                 .name(brandRequest.getName())
                 .description(brandRequest.getDescription())
@@ -34,8 +33,7 @@ public class BrandService {
         return brandResponse;
     }
 
-    @PreAuthorize("hasAuthority({'ADMIN','STAFF_WAREHOUSE'})")
-    public BrandResponse updateBrand(BrandRequest brandRequest, int id) {
+    @PreAuthorize("hasAnyAuthority('SCOPE_ADMIN','SCOPE_STAFF_WAREHOUSE')")    public BrandResponse updateBrand(BrandRequest brandRequest, int id) {
         Brand newBrand = brandRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.BRAND_NOT_FOUND));
 
         newBrand.setName(brandRequest.getName());
@@ -52,7 +50,7 @@ public class BrandService {
         return brandResponse;
     }
 
-    @PreAuthorize("hasAuthority({'ADMIN','STAFF_WAREHOUSE'})")
+    @PreAuthorize("hasAnyAuthority('SCOPE_ADMIN','SCOPE_STAFF_WAREHOUSE')")
     public String deleteBrand(int id) {
         Brand brand = brandRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.BRAND_NOT_FOUND));
         if (!brand.getProducts().isEmpty()) throw new AppException(ErrorCode.FORBIDDEN);

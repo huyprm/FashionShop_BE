@@ -22,7 +22,7 @@ public class PurchaseOrderResponse {
     private OrderStatusEnum orderStatus;
     private String supplier_name;
     private String username;
-    private List<PurchaseOrderDetailResponse> purchaseOrderDetail;
+    private List<PurchaseOrderDetailResponse> purchaseOrderDetails;
 
     @Data
     @AllArgsConstructor

@@ -17,7 +17,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@PreAuthorize("hasAuthority('ADMIN')")
+@PreAuthorize("hasAuthority('SCOPE_ADMIN')")
 public class RoleService {
     private final RoleRepository roleRepository;
 

@@ -20,8 +20,7 @@ import java.util.Optional;
 public class CategoryService {
     private final CategoryRepository categoryRepository;
 
-    @PreAuthorize("hasAuthority({'ADMIN','STAFF_WAREHOUSE'})")
-    public CategoryResponse createCategory(CategoryRequest categoryRequest) {
+    @PreAuthorize("hasAnyAuthority('SCOPE_ADMIN','SCOPE_STAFF_WAREHOUSE')")    public CategoryResponse createCategory(CategoryRequest categoryRequest) {
         Category category = categoryRepository.save(Category.builder().name(categoryRequest.getName()).build());
 
         return CategoryResponse.builder()
@@ -54,8 +53,7 @@ public class CategoryService {
                 .build();
     }
 
-    @PreAuthorize("hasAuthority({'ADMIN','STAFF_WAREHOUSE'})")
-    public CategoryResponse updateCategory(int id, CategoryRequest categoryRequest) {
+    @PreAuthorize("hasAnyAuthority('SCOPE_ADMIN','SCOPE_STAFF_WAREHOUSE')")    public CategoryResponse updateCategory(int id, CategoryRequest categoryRequest) {
         Category category = categoryRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
 
         category.setName(categoryRequest.getName());
@@ -68,8 +66,7 @@ public class CategoryService {
                 .build();
     }
 
-    @PreAuthorize("hasAuthority({'ADMIN','STAFF_WAREHOUSE'})")
-    public String deleteCategory(int id) {
+    @PreAuthorize("hasAnyAuthority('SCOPE_ADMIN','SCOPE_STAFF_WAREHOUSE')")    public String deleteCategory(int id) {
         Category category = categoryRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
 
         if(!category.getProducts().isEmpty()) throw new AppException(ErrorCode.FORBIDDEN);

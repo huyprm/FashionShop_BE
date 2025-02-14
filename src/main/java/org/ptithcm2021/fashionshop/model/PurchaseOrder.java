@@ -25,7 +25,7 @@ public class PurchaseOrder {
     private Date orderDate;
 
     @Enumerated(EnumType.STRING)
-    private OrderStatusEnum orderStatus = OrderStatusEnum.COMPLETED;
+    private OrderStatusEnum orderStatus = OrderStatusEnum.PENDING;
 
     @ManyToOne()
     @JoinColumn(name = "supplier_id")
@@ -36,5 +36,5 @@ public class PurchaseOrder {
     private User user;
 
     @OneToMany(mappedBy = "purchaseOrder", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PurchaseOrderDetail> purchaseOrderDetail;
+    private List<PurchaseOrderDetail> purchaseOrderDetails;
 }

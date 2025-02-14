@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@PreAuthorize("hasAuthority({'ADMIN','STAFF_WAREHOUSE'})")
+@PreAuthorize("hasAnyAuthority('SCOPE_ADMIN','SCOPE_STAFF_WAREHOUSE')")
 public class PurchaseOrderService {
     private final PurchaseOrderRepository purchaseOrderRepository;
     private final UserRepository userRepository;
@@ -39,7 +39,7 @@ public class PurchaseOrderService {
         purchaseOrder.setSupplier(supplier);
         purchaseOrder.setUser(user);
 
-        List<PurchaseOrderDetail> purchaseOrderDetails = purchaseOrderRequest.getPurchaseOrderDetail().stream().map(purchaseOrderDetailRequest -> {
+        List<PurchaseOrderDetail> purchaseOrderDetails = purchaseOrderRequest.getPurchaseOrderDetails().stream().map(purchaseOrderDetailRequest -> {
            PurchaseOrderDetail purchaseOrderDetail = new PurchaseOrderDetail();
 
            purchaseOrderDetail.setQuantity(purchaseOrderDetailRequest.getQuantity());
@@ -52,12 +52,71 @@ public class PurchaseOrderService {
            return purchaseOrderDetail;
         }).collect(Collectors.toList());
 
-        purchaseOrder.setPurchaseOrderDetail(purchaseOrderDetails);
+        purchaseOrder.setPurchaseOrderDetails(purchaseOrderDetails);
 
         purchaseOrderRepository.save(purchaseOrder);
 
-        return purchaseOrderMapper.toPurchaseOrderResponse(purchaseOrder);
+        return purchaseOrderMapper.toResponse(purchaseOrder);
     }
 
 
+        public PurchaseOrderResponse updatePurchaseOrder(PurchaseOrderRequest purchaseOrderRequest, Long purchaseOrderId) {
+        PurchaseOrder purchaseOrder = purchaseOrderRepository.findById(purchaseOrderId).orElseThrow(() -> new RuntimeException("Purchase Order Not Found"));
+
+        purchaseOrder.setOrderStatus(purchaseOrderRequest.getOrderStatus());
+        purchaseOrder.setOrderDate(purchaseOrderRequest.getOrderDate());
+
+        User user = userRepository.findById(purchaseOrderRequest.getUser_id()).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        purchaseOrder.setUser(user);
+
+        Supplier supplier = supplierRepository.findById(purchaseOrderRequest.getSupplier_id()).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        purchaseOrder.setSupplier(supplier);
+
+        purchaseOrder.getPurchaseOrderDetails().clear();
+
+        List<PurchaseOrderDetail> purchaseOrderDetails = purchaseOrderRequest.getPurchaseOrderDetails().stream().map(purchaseOrderDetailRequest -> {
+            PurchaseOrderDetail purchaseOrderDetail = new PurchaseOrderDetail();
+
+            purchaseOrderDetail.setQuantity(purchaseOrderDetailRequest.getQuantity());
+            purchaseOrderDetail.setPrice(purchaseOrderDetailRequest.getPrice());
+
+            Product product = productRepository.findById(purchaseOrderDetailRequest.getProduct_id()).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+            purchaseOrderDetail.setProduct(product);
+            purchaseOrderDetail.setPurchaseOrder(purchaseOrder);
+
+            return purchaseOrderDetail;
+        }).collect(Collectors.toList());
+
+        purchaseOrder.getPurchaseOrderDetails().addAll(purchaseOrderDetails);
+
+        purchaseOrderRepository.save(purchaseOrder);
+
+        return purchaseOrderMapper.toResponse(purchaseOrder);
+    }
+
+    public String deletePurchaseOrder(Long purchaseOrderId) {
+        if(!purchaseOrderRepository.existsById(purchaseOrderId)) {
+            throw new RuntimeException("Purchase Order Not Found");
+        }
+        purchaseOrderRepository.deleteById(purchaseOrderId);
+        return "Purchase Order Deleted Successfully";
+    }
+
+    public PurchaseOrderResponse getPurchaseOrder(Long purchaseOrderId) {
+        PurchaseOrder  purchaseOrder = purchaseOrderRepository.findById(purchaseOrderId).orElseThrow(() -> new RuntimeException("Purchase Order Not Found"));
+
+        return purchaseOrderMapper.toResponse(purchaseOrder);
+    }
+
+    public List<PurchaseOrderResponse> getPurchaseOrders() {
+        List<PurchaseOrder> purchaseOrders = purchaseOrderRepository.findAll();
+        return purchaseOrders.stream().map(purchaseOrder -> {
+
+            PurchaseOrderResponse purchaseOrderResponse = purchaseOrderMapper.toResponse(purchaseOrder);
+
+            purchaseOrderResponse.setPurchaseOrderDetails(null);
+
+            return purchaseOrderResponse;
+        }).collect(Collectors.toList());
+    }
 }

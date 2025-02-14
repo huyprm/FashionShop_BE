@@ -28,7 +28,7 @@ public class PurchaseOrderRequest {
     private String user_id;
 
     @NotNull(message = "Please enter the product ordered.")
-    private List<PurchaseOrderDetailRequest> purchaseOrderDetail;
+    private List<PurchaseOrderDetailRequest> purchaseOrderDetails;
 
     @Data
     @NoArgsConstructor

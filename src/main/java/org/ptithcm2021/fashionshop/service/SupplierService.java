@@ -14,7 +14,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@PreAuthorize("hasAuthority({'ADMIN','STAFF_WAREHOUSE'})")
+@PreAuthorize("hasAnyAuthority('SCOPE_ADMIN','SCOPE_STAFF_WAREHOUSE')")
 public class SupplierService {
     private final SupplierRepository supplierRepository;
     private final SupplierMapper supplierMapper;

@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@PreAuthorize("hasAuthority({'ADMIN','STAFF_WAREHOUSE'})")
+@PreAuthorize("hasAnyAuthority('SCOPE_ADMIN','SCOPE_STAFF_WAREHOUSE')")
 public class ProductVariantService {
     private final ProductVariantRepository productVariantRepository;
     private final ProductVariantMapper productVariantMapper;

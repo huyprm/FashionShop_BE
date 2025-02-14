@@ -6,6 +6,7 @@ import org.ptithcm2021.fashionshop.dto.response.VoucherResponse;
 import org.ptithcm2021.fashionshop.mapper.VoucherMapper;
 import org.ptithcm2021.fashionshop.model.Voucher;
 import org.ptithcm2021.fashionshop.repository.VoucherRepository;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,16 +14,19 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+
 public class VoucherService {
     private final VoucherRepository voucherRepository;
     private final VoucherMapper voucherMapper;
 
+    @PreAuthorize("hasAnyAuthority('SCOPE_ADMIN')")
     public VoucherResponse createVoucher(VoucherRequest voucherRequest) {
         if(voucherRepository.findByCode(voucherRequest.getCode()).isPresent()) throw new RuntimeException("Voucher codes really do exist");
 
         return voucherMapper.toVoucherResponse(voucherRepository.save(voucherMapper.toVoucher(voucherRequest)));
     }
 
+    @PreAuthorize("hasAnyAuthority('SCOPE_ADMIN')")
     public String deleteVoucher(int code) {
         Optional<Voucher> voucher = voucherRepository.findById(code);
         if (voucher.isEmpty()) {
@@ -32,6 +36,7 @@ public class VoucherService {
         return "Voucher deleted";
     }
 
+    @PreAuthorize("hasAnyAuthority('SCOPE_ADMIN')")
     public VoucherResponse getVoucherById(int code) {
         Optional<Voucher> voucher = voucherRepository.findById(code);
         if (voucher.isEmpty()) {

@@ -1,29 +1,26 @@
 package org.ptithcm2021.fashionshop.mapper;
 
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.Helper;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.ptithcm2021.fashionshop.dto.request.PurchaseOrderRequest;
+import org.mapstruct.*;
 import org.ptithcm2021.fashionshop.dto.response.PurchaseOrderResponse;
 import org.ptithcm2021.fashionshop.model.PurchaseOrder;
 import org.ptithcm2021.fashionshop.model.PurchaseOrderDetail;
-import org.ptithcm2021.fashionshop.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 public interface PurchaseOrderMapper {
 
+    @Mapping(source = "supplier.name", target = "supplier_name")
+    @Mapping(source = "user.fullname", target = "username")
+    @Mapping(source = "purchaseOrderDetails", target = "purchaseOrderDetails", qualifiedByName = "mapDetails")
+    PurchaseOrderResponse toResponse(PurchaseOrder purchaseOrder);
 
-//    @Mapping(target = "supplier", expression = "java(helper.findSupplierById(purchaseOrderRequest.getSupplier_id()))")
-//    @Mapping(target = "user", expression = "java(helper.findUserById(purchaseOrderRequest.getUser_id()))")
-//    @Mapping(target ="purchaseOrderDetail", source = "purchaseOrderDetail")
-//    PurchaseOrder toPurchaseOrder(PurchaseOrderRequest purchaseOrderRequest);
+    @Named("mapDetails")
+    default List<PurchaseOrderResponse.PurchaseOrderDetailResponse> mapDetails(List<PurchaseOrderDetail> details) {
+        return details.stream().map(this::toDetailResponse).collect(Collectors.toList());
+    }
 
-    @Mapping(target = "supplier_name", source = "supplier.name")
-    @Mapping(target = "username", source = "user.fullname")
-    PurchaseOrderResponse toPurchaseOrderResponse(PurchaseOrder purchaseOrder);
-
-//    @Mapping(target = "product", expression = "java(helper.findProductById(purchaseOrderDetailRequest.getProduct_id()))")
-//    PurchaseOrderDetail toPurchaseOrderDetail(PurchaseOrderRequest.PurchaseOrderDetailRequest purchaseOrderDetailRequest);
+    @Mapping(source = "product.name", target = "productName")
+    PurchaseOrderResponse.PurchaseOrderDetailResponse toDetailResponse(PurchaseOrderDetail detail);
 }
