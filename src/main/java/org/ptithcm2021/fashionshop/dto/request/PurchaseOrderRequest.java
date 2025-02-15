@@ -39,7 +39,7 @@ public class PurchaseOrderRequest {
         @NotNull
         private double price;
         @NotNull
-        private int product_id;
+        private int productVariant_id;
 
     }
 }

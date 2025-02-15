@@ -17,7 +17,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class PurchaseOrderResponse {
-    private int id;
+    private long id;
     private Date orderDate;
     private OrderStatusEnum orderStatus;
     private String supplier_name;
@@ -29,9 +29,18 @@ public class PurchaseOrderResponse {
     @NoArgsConstructor
     @Builder
     public static class PurchaseOrderDetailResponse {
-        private int id;
+        private long id;
         private String productName;
-        private int quantity;
-        private double price;
+        private List<Variant>variants;
+
+        @Data
+        @AllArgsConstructor
+        @NoArgsConstructor
+        @Builder
+        public static class Variant {
+            private int id;
+            private int quantity;
+            private double price;
+        }
     }
 }
