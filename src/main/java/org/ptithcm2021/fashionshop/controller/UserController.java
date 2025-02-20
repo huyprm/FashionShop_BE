@@ -8,10 +8,27 @@ import org.ptithcm2021.fashionshop.dto.request.UserUpdateRequest;
 import org.ptithcm2021.fashionshop.dto.response.ApiResponse;
 import org.ptithcm2021.fashionshop.dto.response.UserResponse;
 import org.ptithcm2021.fashionshop.service.UserService;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.core.io.InputStreamSource;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
+
+import static java.lang.System.load;
 
 @RestController
 @RequestMapping("/api/users")
@@ -63,4 +80,33 @@ public class UserController {
     public ApiResponse<UserResponse> changeRoleUser(@PathVariable String id, @RequestParam String role) {
         return ApiResponse.<UserResponse>builder().data(userService.changeRoleUser(id, role)).build();
     }
+
+    @PostMapping("/{id}/avatar")
+    public ApiResponse<UserResponse> updateUserAvatar(@PathVariable String id, @RequestParam MultipartFile file) throws UnsupportedEncodingException {
+        return ApiResponse.<UserResponse>builder()
+                .data(userService.updateAvatar(file, id))
+                .build();
+
+    }
+
+    @GetMapping("/get-avatar/{fileName}")
+    public ResponseEntity<Resource> getAvatar(@PathVariable String fileName) throws FileNotFoundException {
+        Path file = Paths.get("E:/Java/FashionShop/images/avatar/").resolve(fileName);
+        File temp = new File(file.toFile().getAbsolutePath());
+
+        // Wrap the File in InputStreamResource or FileSystemResource
+        InputStreamResource resource = new InputStreamResource(new FileInputStream(temp));
+
+        // Check if the file exists and is readable
+        if (temp.exists() && temp.canRead()) {
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_JPEG)
+                    .body(resource);
+        }
+
+        // Return an error response if the file does not exist or cannot be read
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(null);
+    }
+
 }

@@ -18,7 +18,10 @@ import org.ptithcm2021.fashionshop.repository.UserRepository;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,6 +35,7 @@ public class UserService {
     private final AuthenticationService authenticationService;
     private final RoleService roleService;
     private final RoleRepository roleRepository;
+    private final FileService fileService;
 
     public UserResponse createUser(UserRegisterRequest userRegisterRequest) throws Exception {
         User user = userMapper.toUser(userRegisterRequest);
@@ -114,6 +118,17 @@ public class UserService {
 
         Role role = roleRepository.findById(roleId).orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
         user.setRole(role);
+        userRepository.save(user);
+        return userMapper.toUserResponse(user);
+    }
+
+    public UserResponse updateAvatar(MultipartFile file, String id) throws UnsupportedEncodingException {
+        User user = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        fileService.deleteFile("avatar", user.getImg());
+        String imageUrl = fileService.storeFile(file, "avatar");
+
+        user.setImg(imageUrl);
         userRepository.save(user);
         return userMapper.toUserResponse(user);
     }

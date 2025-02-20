@@ -1,6 +1,7 @@
 package org.ptithcm2021.fashionshop.service;
 
 import com.nimbusds.jose.*;
+
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
@@ -15,7 +16,7 @@ import org.ptithcm2021.fashionshop.exception.ErrorCode;
 import org.ptithcm2021.fashionshop.exception.AppException;
 import org.ptithcm2021.fashionshop.model.User;
 import org.ptithcm2021.fashionshop.repository.UserRepository;
-import org.ptithcm2021.fashionshop.util.SendEmail;
+import org.ptithcm2021.fashionshop.util.MailUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -35,6 +36,7 @@ public class AuthenticationService {
     private String sign;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final MailUtils mailUtils;
 
     public AuthenticationResponse login (LoginRequest loginRequest) throws Exception {
         String emailRegex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
@@ -150,7 +152,7 @@ public class AuthenticationService {
         emailRequest.setSubject(user.getEmail());
         emailRequest.setBody("Click this link to verify your email: " + verificationUrl);
 
-        SendEmail.sendEmail(emailRequest);
+        mailUtils.sendEmail(emailRequest);
     }
 
     public void verificationEmail(String token){

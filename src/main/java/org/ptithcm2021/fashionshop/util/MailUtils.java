@@ -1,22 +1,25 @@
 package org.ptithcm2021.fashionshop.util;
 
-import lombok.RequiredArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.ptithcm2021.fashionshop.dto.request.EmailRequest;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 @Slf4j
-@Service
-public class SendEmail {
-    private static JavaMailSender mailSender;
+@Component
+@Setter
+@Getter
+public class MailUtils {
+    private JavaMailSender mailSender;
 
-    public SendEmail(JavaMailSender mailSender) {
-        SendEmail.mailSender = mailSender;
+    public MailUtils(JavaMailSender mailSender) {
+        this.mailSender = mailSender;
     }
 
-    public static String sendEmail(EmailRequest emailRequest) {
+    public String sendEmail(EmailRequest emailRequest) {
         if (mailSender == null) {
             throw new IllegalStateException("JavaMailSender has not been initialized.");
         }
