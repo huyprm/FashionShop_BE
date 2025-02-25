@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.ptithcm2021.fashionshop.dto.request.ProductVariantRequest;
 import org.ptithcm2021.fashionshop.enums.ProductStatusEnum;
+import org.ptithcm2021.fashionshop.model.BundleDiscount;
 
 import java.util.List;
 
@@ -20,6 +21,7 @@ public class ProductResponse {
     private String name;
     private String description;
     private List<String> images;
+    private String thumbnail;
     private String price;
     private int stock_quantity;
     private CategoryResponse category;
@@ -27,4 +29,5 @@ public class ProductResponse {
     private int sold;
     private ProductStatusEnum status;
     private List<ProductVariantResponse> productVariantList;
+    private List<BundleDiscountResponse> bundleDiscountList;
 }

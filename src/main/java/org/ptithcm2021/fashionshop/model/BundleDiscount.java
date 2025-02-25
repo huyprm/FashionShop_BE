@@ -1,15 +1,20 @@
 package org.ptithcm2021.fashionshop.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.annotations.NaturalId;
 import org.ptithcm2021.fashionshop.enums.DiscountTypeEnum;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity(name = "bundle_discounts")
 @AllArgsConstructor
 @NoArgsConstructor
+@Setter
+@Getter
+@Builder
 public class BundleDiscount {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,10 +22,11 @@ public class BundleDiscount {
 
     @ManyToOne
     @JoinColumn(name = "main_product_id")
-    private Product mainProduct_id;
+    private Product mainProduct;
 
     @ManyToOne
-    @JoinColumn(name = "bundled_product_id")
+    @NaturalId
+    @JoinColumn(name = "bundle_product_id")
     private Product bundledProduct;
 
     @Enumerated(EnumType.STRING)
@@ -30,13 +36,11 @@ public class BundleDiscount {
     @Column(nullable = false)
     private double discountValue;
 
-    @Column
-    private int maxQuantity = 1;
+    @NaturalId
+    @Column(nullable = false)
+    private LocalDateTime startDate;
 
     @Column(nullable = false)
-    private Date startDate;
-
-    @Column(nullable = false)
-    private Date endDate;
+    private LocalDateTime endDate;
 
 }

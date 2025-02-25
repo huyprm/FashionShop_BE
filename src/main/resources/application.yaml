@@ -48,6 +48,12 @@ jwt:
 storage:
   location: E:\\Java\\FashionShop\\images
 
+VNPay:
+  vnp_PayUrl: "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"
+  vnp_ReturnUrl: "http://localhost:8080/api/payments/returnStatus"
+  vnp_TmnCode: "5WBEBV7X"
+  vnp_HashSecret: "RQTDJY26UYM1G5AFFRT9WH9WSKB1W1FL"
+
 
 
 

@@ -15,10 +15,10 @@ public class OrderDetail {
     private long id;
 
     private int quantity;
-    private double price;
+
     @ManyToOne
     @JoinColumn(name = "product_id")
-    private Product product;
+    private ProductVariant productVariant;
 
     @ManyToOne
     @JoinColumn(name = "order_id")

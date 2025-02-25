@@ -22,4 +22,5 @@ public class Payment {
     @OneToOne
     @JoinColumn(name = "user_id")
     private User user;
+
 }

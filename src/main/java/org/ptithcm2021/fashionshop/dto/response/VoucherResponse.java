@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.ptithcm2021.fashionshop.enums.DiscountTypeEnum;
 
+import java.util.Date;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -20,4 +22,5 @@ public class VoucherResponse {
     private double minOrderValue;
     private double maxDiscountValue;
     private int quantity;
+    private Date endDate;
 }

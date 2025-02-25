@@ -10,9 +10,12 @@ import org.ptithcm2021.fashionshop.dto.response.ProductResponse;
 import org.ptithcm2021.fashionshop.dto.response.ProductVariantResponse;
 import org.ptithcm2021.fashionshop.service.ProductService;
 import org.ptithcm2021.fashionshop.service.ProductVariantService;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -26,8 +29,11 @@ public class ProductController {
         return ApiResponse.<ProductResponse>builder().data(productService.getProductById(id)).build();
     }
 
-    @PostMapping("/create")
-    public ApiResponse<ProductResponse> creatProductVariant (@RequestBody @Valid ProductRequest request) {
+
+    @PostMapping(value = "/create")
+    public ApiResponse<ProductResponse> creatProductVariant(
+            @RequestBody @Valid ProductRequest request)
+     {
         return ApiResponse.<ProductResponse>builder()
                 .data(productService.addProduct(request))
                 .build();
@@ -106,5 +112,12 @@ public class ProductController {
     @DeleteMapping("/{id}")
     public ApiResponse<String> deleteProduct(@PathVariable int id) {
         return ApiResponse.<String>builder().message(productService.deleteProduct(id)).build();
+    }
+
+    @GetMapping("/search")
+    public ApiResponse<Map<Integer, String>> searchProducts(@RequestParam String keyword) {
+        String data = '"'+keyword+'"';
+        return ApiResponse.<Map<Integer, String>>builder()
+                .data(productService.searchProduct(data)).build();
     }
 }

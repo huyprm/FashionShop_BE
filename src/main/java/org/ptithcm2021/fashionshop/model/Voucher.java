@@ -34,4 +34,6 @@ public class Voucher {
 
     @Column(nullable = false)
     private int quantity;
+
+    private Date endDate;
 }

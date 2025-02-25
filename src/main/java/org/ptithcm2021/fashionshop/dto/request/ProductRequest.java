@@ -16,6 +16,7 @@ public class ProductRequest {
     @Size(min = 100, message = "Description must be as least 100 character")
     private String description;
     private List<String> images;
+    private String thumbnail;
     private String price;
     @Min(value = 1, message = "Quantity must be greater than or equal to 1.")
     private int stock_quantity;

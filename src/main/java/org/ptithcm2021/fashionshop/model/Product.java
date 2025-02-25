@@ -6,8 +6,7 @@ import org.ptithcm2021.fashionshop.enums.ProductStatusEnum;
 
 import java.util.List;
 
-@Entity
-@Table(name = "products")
+@Entity(name = "products")
 @Setter
 @Getter
 @NoArgsConstructor
@@ -18,6 +17,7 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @Column(nullable = false)
     private String name;
 
     @Column(columnDefinition = "text")
@@ -25,6 +25,8 @@ public class Product {
 
     @ElementCollection
     private List<String> images;
+
+    private String thumbnail;
 
     private String price;
     private int stock_quantity;
@@ -48,4 +50,7 @@ public class Product {
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<ProductVariant> productVariantList;
+
+    @OneToMany(mappedBy = "mainProduct")
+    private List<BundleDiscount> bundleDiscountList;
 }

@@ -122,6 +122,7 @@ public class UserService {
         return userMapper.toUserResponse(user);
     }
 
+    @PreAuthorize("#id == authentication.name")
     public UserResponse updateAvatar(MultipartFile file, String id) throws UnsupportedEncodingException {
         User user = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 

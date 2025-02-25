@@ -16,6 +16,7 @@ import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 import javax.crypto.SecretKey;
@@ -35,15 +36,22 @@ public class SecurityConfig {
     private static final String[] PUBLIC_ENDPOINTS = {
             "/api/auth/login",
             "/api/auth/verifyEmail/{email}",
-            "/api/users/register"
+            "/api/users/register",
+            "/api/payments/returnStatus/**"
+    };
 
+    private static final String[] GET_ENDPOINTS = {
+            "/api/products/**",
+            "/api/brands/**",
+            "/api/categories/**",
+            "/api/auth/verifyEmail",
+            "/api/images/**",
+            "/api/bundle_discounts"
     };
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                        .requestMatchers(HttpMethod.GET,
-                                "/api/auth/verifyEmail",
-                                "/api/images/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, GET_ENDPOINTS).permitAll()
                         .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
                         .requestMatchers(
                                 "/swagger-ui/**",  // Swagger UI
@@ -52,11 +60,23 @@ public class SecurityConfig {
                                 "/swagger-resources/**").permitAll()
                         .anyRequest().authenticated()
                 );
+
+//        http.cors(cors -> cors.configurationSource(request -> {
+//            CorsConfiguration config = new CorsConfiguration();
+//            config.setAllowedOrigins(List.of("http://localhost:3000")); // Chỉ frontend này được truy cập
+//            config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
+//            config.setAllowedHeaders(List.of("*"));
+//            config.setAllowCredentials(true);
+//            return config;
+//        }));
+
         http.oauth2ResourceServer(oauth2 -> oauth2
                 .jwt(jwtConfigurer -> jwtConfigurer.decoder(jwtDecoder()))
                 .authenticationEntryPoint(new EntryPointAuthentication())
                 );
+
         http.csrf(AbstractHttpConfigurer::disable);
+
         return http.build();
     }
 

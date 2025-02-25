@@ -5,9 +5,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ptithcm2021.fashionshop.dto.request.ProductRequest;
 import org.ptithcm2021.fashionshop.dto.request.ProductUpdateRequest;
+import org.ptithcm2021.fashionshop.dto.request.ProductVariantRequest;
 import org.ptithcm2021.fashionshop.dto.response.BrandResponse;
 import org.ptithcm2021.fashionshop.dto.response.CategoryResponse;
 import org.ptithcm2021.fashionshop.dto.response.ProductResponse;
+import org.ptithcm2021.fashionshop.dto.response.ProductVariantResponse;
 import org.ptithcm2021.fashionshop.enums.ProductStatusEnum;
 import org.ptithcm2021.fashionshop.exception.AppException;
 import org.ptithcm2021.fashionshop.exception.ErrorCode;
@@ -21,8 +23,12 @@ import org.ptithcm2021.fashionshop.repository.CategoryRepository;
 import org.ptithcm2021.fashionshop.repository.ProductRepository;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -35,6 +41,7 @@ public class ProductService {
     private final CategoryRepository categoryRepository;
     private final ProductMapper productMapper;
     private final ProductVariantService productVariantService;
+    private final FileService fileService;
 
     public ProductResponse getProductById(int id) {
         Product product = productRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
@@ -53,18 +60,20 @@ public class ProductService {
         return productResponse;
     }
 
-    @PreAuthorize("hasAnyAuthority('SCOPE_ADMIN','SCOPE_STAFF_WAREHOUSE')")    public ProductResponse addProduct(ProductRequest productRequest) {
+    @PreAuthorize("hasAnyAuthority('SCOPE_ADMIN','SCOPE_STAFF_WAREHOUSE')")
+    public ProductResponse addProduct(ProductRequest productRequest) {
         Brand brand = brandRepository.findById(productRequest.getBrand_id()).orElseThrow(() -> new AppException(ErrorCode.BRAND_NOT_FOUND));
         Category category = categoryRepository.findById(productRequest.getCategory_id()).orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
 
         Product product = new Product();
+
         product.setImages(productRequest.getImages());
+        product.setThumbnail(productRequest.getThumbnail());
         product.setName(productRequest.getName());
         product.setPrice(productRequest.getPrice());
         product.setBrand(brand);
         product.setCategory(category);
         product.setDescription(productRequest.getDescription());
-        product.setStock_quantity(productRequest.getStock_quantity());
 
         List<ProductVariant> list = productRequest.getProductVariantList().stream().map(productVariantRequest ->{
             ProductVariant product_variant = ProductVariant.builder()
@@ -78,15 +87,22 @@ public class ProductService {
             return product_variant;
         } ).toList();
 
+        int tempQuantity = productRequest.getProductVariantList().stream().mapToInt(ProductVariantRequest::getQuantity).sum();
+
+        product.setStock_quantity(tempQuantity != 0 ? tempQuantity : productRequest.getStock_quantity());
         product.setProductVariantList(list);
         return productMapper.toProductResponse(productRepository.save(product));
     }
 
-    @PreAuthorize("hasAnyAuthority('SCOPE_ADMIN','SCOPE_STAFF_WAREHOUSE')")    @Transactional
+    @PreAuthorize("hasAnyAuthority('SCOPE_ADMIN','SCOPE_STAFF_WAREHOUSE')")
+    @Transactional
     public ProductResponse updateProduct(ProductUpdateRequest productRequest, int id) {
         Product product = productRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
-        product.setImages(productRequest.getImages());
+        product.setImages(productRequest.getImages_deleted());
+        fileService.deleteFiles("product", productRequest.getImages_deleted());
+
+        product.setThumbnail(productRequest.getThumbnail());
         product.setName(productRequest.getName());
         product.setPrice(productRequest.getPrice());
 
@@ -102,9 +118,11 @@ public class ProductService {
        }
         product.setStatus(productRequest.getStatus());
         product.setDescription(productRequest.getDescription());
-        product.setStock_quantity(productRequest.getStock_quantity());
 
-        productVariantService.updateProductVariant(productRequest.getProductVariantList());
+        var tempQuantity = productVariantService.updateProductVariant(productRequest.getProductVariantList())
+                .stream().mapToInt(ProductVariantResponse::getQuantity).sum();
+
+        product.setStock_quantity(tempQuantity != 0 ? tempQuantity : productRequest.getStock_quantity());
 
         return productMapper.toProductResponse(productRepository.save(product));
     }
@@ -138,10 +156,15 @@ public class ProductService {
         return products.stream().map(productMapper::toProductResponse).collect(Collectors.toList());
     }
 
-    @PreAuthorize("hasAnyAuthority('SCOPE_ADMIN','SCOPE_STAFF_WAREHOUSE')")    public String deleteProduct(int id) {
+    @PreAuthorize("hasAnyAuthority('SCOPE_ADMIN','SCOPE_STAFF_WAREHOUSE')")
+    public String deleteProduct(int id) {
         Product product = productRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
 
         product.setStatus(ProductStatusEnum.DISCONTINUED);
         return "Product deleted";
+    }
+
+    public Map<Integer, String> searchProduct(String keyword){
+        return productRepository.searchProduct(keyword);
     }
 }

@@ -28,4 +28,6 @@ public class VoucherRequest {
 
     @NotNull(message = "Discount quantity cannot be left blank")
     private int quantity;
+
+    private Date endDate;
 }

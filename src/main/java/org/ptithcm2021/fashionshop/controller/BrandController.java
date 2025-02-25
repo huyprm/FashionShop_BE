@@ -29,7 +29,7 @@ public class BrandController {
                 .build();
     }
 
-    @DeleteMapping("{id}/delete")
+    @DeleteMapping("/{id}/delete")
     public ApiResponse<String> deleteBrand(@PathVariable int id) {
         return ApiResponse.<String>builder()
                 .message(brandService.deleteBrand(id))
@@ -42,7 +42,7 @@ public class BrandController {
                 .data(brandService.getAllBrands()).build();
     }
 
-    @GetMapping("{id}")
+    @GetMapping("/{id}")
     public ApiResponse<BrandResponse> getBrand(@PathVariable int id) {
         return ApiResponse.<BrandResponse>builder()
                 .data(brandService.getBrandById(id)).build();
