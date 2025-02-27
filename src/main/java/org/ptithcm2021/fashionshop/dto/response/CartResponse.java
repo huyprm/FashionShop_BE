@@ -1,5 +1,7 @@
 package org.ptithcm2021.fashionshop.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,6 +20,7 @@ public class CartResponse {
     private int id;
     private double totalPrice;
     private int quantity;
+    @JsonIgnoreProperties("product")
     private ProductVariant productVariant;
 
     private List<DiscountDetailResponse> cartDiscountDetails;
@@ -27,8 +30,10 @@ public class CartResponse {
     @NoArgsConstructor
     @Builder
     public static class DiscountDetailResponse {
-
+        private int id;
+        @JsonIgnoreProperties("product")
         private ProductVariant productVariant;
+        private BundleDiscountResponse bundleDiscount;
         private double price;
         private int quantity;
     }

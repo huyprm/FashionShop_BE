@@ -61,12 +61,6 @@ public class AuthenticationController {
         return ApiResponse.<String>builder().data("Success").build();
     }
 
-
-public ApiResponse<Void> changePassword(String oldPassword, String newPassword) {
-
-    return null;
-}
-
     @GetMapping("/verifyEmail")
     public ApiResponse<String> verifyEmai(@RequestParam String token) {
         authenticationService.verificationEmail(token);

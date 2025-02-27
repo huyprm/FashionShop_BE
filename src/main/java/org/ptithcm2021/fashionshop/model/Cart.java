@@ -1,5 +1,6 @@
 package org.ptithcm2021.fashionshop.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -27,6 +28,7 @@ public class Cart {
     @JoinColumn (name = "productVariant_id")
     private ProductVariant productVariant;
 
-    @OneToMany(mappedBy = "cart")
+
+    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL)
     private List<CartDiscountDetail> cartDiscountDetails;
 }

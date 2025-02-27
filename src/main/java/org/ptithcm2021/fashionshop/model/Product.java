@@ -1,5 +1,6 @@
 package org.ptithcm2021.fashionshop.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.ptithcm2021.fashionshop.enums.ProductStatusEnum;
@@ -48,6 +49,7 @@ public class Product {
     @JoinColumn(name = "brand_id")
     private Brand brand;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<ProductVariant> productVariantList;
 

@@ -2,6 +2,8 @@ package org.ptithcm2021.fashionshop.dto.request;
 
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -19,9 +21,10 @@ public class CartRequest {
     @NotNull
     private String user_id;
 
-    @NotNull
+    @Min(value = 1, message = "Quantity must be greater than or equal to 1.")
     private int quantity;
 
+    @Valid
     private List<DiscountDetailRequest> cartDiscountDetails;
 
     @NotNull
@@ -37,7 +40,7 @@ public class CartRequest {
         @NotNull
         private int bundleDiscount_id;
 
-        @NotNull
+        @Min(value = 1, message = "Quantity must be greater than or equal to 1.")
         private int quantity;
     }
 }

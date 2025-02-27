@@ -1,5 +1,6 @@
 package org.ptithcm2021.fashionshop.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import lombok.*;
@@ -22,6 +23,7 @@ public class ProductVariant {
     private String image;
     private String color;
     private String size;
+
     @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;
