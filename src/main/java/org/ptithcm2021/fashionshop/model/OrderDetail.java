@@ -16,6 +16,8 @@ public class OrderDetail {
 
     private int quantity;
 
+    private double price;
+
     @ManyToOne
     @JoinColumn(name = "product_id")
     private ProductVariant productVariant;

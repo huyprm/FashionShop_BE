@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.ptithcm2021.fashionshop.enums.DiscountTypeEnum;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity(name = "vouchers")
@@ -30,10 +32,10 @@ public class Voucher {
     @Column
     private double minOrderValue = 0;
 
-    private double maxDiscountValue;
+    private Double maxDiscountValue;
 
     @Column(nullable = false)
     private int quantity;
 
-    private Date endDate;
+    private LocalDateTime endDate;
 }

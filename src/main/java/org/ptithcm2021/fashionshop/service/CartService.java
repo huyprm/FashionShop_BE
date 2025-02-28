@@ -1,6 +1,7 @@
 package org.ptithcm2021.fashionshop.service;
 
 import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ptithcm2021.fashionshop.dto.request.CartRequest;
@@ -31,6 +32,7 @@ public class CartService {
     private final CartDetailRepository cartDetailRepository;
     private final CartMapper cartMapper;
 
+    @Transactional
     public CartResponse createCart(CartRequest cartRequest) {
 
         User user = userRepository.findById(cartRequest.getUser_id()).orElseThrow(()-> new AppException(ErrorCode.USER_NOT_FOUND));
@@ -91,6 +93,7 @@ public class CartService {
     }
 
 
+    @Transactional
     public String deleteCart(int id, String type) {
         if(type.equals("main")){
             cartRepository.deleteById(id);

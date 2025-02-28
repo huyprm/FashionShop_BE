@@ -22,6 +22,7 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     private OrderStatusEnum status = OrderStatusEnum.PENDING;
 
@@ -39,10 +40,10 @@ public class Order {
 
     private double voucherDiscount_price;
 
-
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderDetail> orderDetails;
 
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     private PaymentStatusEnum paymentStatus = PaymentStatusEnum.PENDING;
 

@@ -1,6 +1,7 @@
 package org.ptithcm2021.fashionshop.mapper;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.ptithcm2021.fashionshop.dto.request.OrderRequest;
 import org.ptithcm2021.fashionshop.dto.response.OrderResponse;
 import org.ptithcm2021.fashionshop.model.Order;
