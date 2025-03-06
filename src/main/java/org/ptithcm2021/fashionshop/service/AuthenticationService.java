@@ -6,6 +6,9 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ptithcm2021.fashionshop.dto.request.EmailRequest;
@@ -64,7 +67,7 @@ public class AuthenticationService {
 
         return AuthenticationResponse.builder()
                 .accessToken(accessToken)
-                .refreshToken(refreshToken)
+                .cookie(createCookie(refreshToken, 86400))
                 .build();
     }
 
@@ -121,7 +124,7 @@ public class AuthenticationService {
         return jwsObject.serialize();
     }
 
-    public Boolean verifyToken(String token ) throws JOSEException, ParseException {
+    private Boolean verifyToken(String token ) throws JOSEException, ParseException {
         JWSVerifier verifier = new MACVerifier(sign.getBytes());
 
         SignedJWT jwt = SignedJWT.parse(token);
@@ -135,11 +138,13 @@ public class AuthenticationService {
     }
 
 
-    public void handleRefreshToken(String id) throws Exception {
+    public Cookie logout(String id) {
         User user = userRepository.findById(id).orElseThrow(()->new AppException(ErrorCode.USER_NOT_FOUND));
 
         user.setRefreshToken(null);
         userRepository.save(user);
+
+        return createCookie(null, 0);
     }
 
     public void sendVerificationEmail(String email){
@@ -161,5 +166,36 @@ public class AuthenticationService {
         user.setRefreshToken(null);
         user.setStatus(AccountStatusEnum.ACTIVE);
         userRepository.save(user);
+    }
+
+    private Cookie createCookie(String refreshToken, int expireTime){
+        Cookie cookie = new Cookie("refreshToken", refreshToken);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setSecure(true);
+        cookie.setMaxAge(expireTime);
+
+        return cookie;
+    }
+
+    public AuthenticationResponse refreshToken(String refreshToken, String userId) throws Exception {
+        if(refreshToken == null)  throw new RuntimeException("Refresh token not found");
+
+        if (!verifyToken(refreshToken))
+            throw new AppException(ErrorCode.INVALID_JWT);
+
+        User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        //check token revoked
+        if(!user.getRefreshToken().equals(refreshToken)) throw new AppException(ErrorCode.INVALID_JWT);
+
+        String refresh = generateRefreshToken(user);
+        user.setRefreshToken(refresh);
+        userRepository.save(user);
+
+        return AuthenticationResponse.builder()
+                .accessToken(generateAccessToken(user))
+                .cookie(createCookie(refresh, 86400))
+                .build();
     }
 }

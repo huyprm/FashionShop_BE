@@ -16,7 +16,7 @@ public class ProductVariant {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY )
     private int id;
-    @Min(value = 1, message = "Quantity must be greater than or equal to 1.")
+    @Min(value = 0, message = "Quantity must be greater than or equal to 0.")
     private int quantity;
     @Min(value = 0, message = "Product price cannot be less than 0.")
     private double price;

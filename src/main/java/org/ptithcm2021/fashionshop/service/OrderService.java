@@ -29,40 +29,65 @@ public class OrderService {
 
     @Transactional
     @PreAuthorize("#id == authentication.name")
-    public OrderResponse createOrder(OrderRequest orderRequest, String id){
+    public OrderResponse createOrder(OrderRequest orderRequest, String id) {
+        Cart cart = cartRepository.findById(orderRequest.getCartId())
+                .orElseThrow(() -> new AppException(ErrorCode.CART_NOT_FOUND));
 
-        Cart cart = cartRepository.findById(orderRequest.getCartId()).orElseThrow(() -> new RuntimeException("Cart not found"));
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
-        User user = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         Order order = orderMapper.toOrder(orderRequest);
+        order.setUser(user);
+        order.setPaymentMethod(orderRequest.getPaymentMethod());
 
-        if(orderRequest.getVoucherCode() != null) {
-            Voucher voucher = voucherRepository.findByCode(orderRequest.getVoucherCode())
-                    .orElseThrow(() -> new RuntimeException("Invalid voucher code"));
+        processVoucher(orderRequest, cart, order);
 
-            if (voucher.getMinOrderValue() > cart.getTotalPrice()) {
-                throw new RuntimeException("You are not eligible for discount");
-            }
-            if (voucher.getQuantity() > 0) {
-                if (voucher.getEndDate().isBefore(orderRequest.getDate())) {
-                    throw new RuntimeException("Voucher expired");
-                }
-            } else {
-                throw new RuntimeException("Coupon has been used up");
-            }
+        List<OrderDetail> orderDetails = createOrderDetails(cart, order);
+        updateInventory(orderDetails);
 
-            double discount;
-            if (voucher.getDiscountType() == DiscountTypeEnum.PERCENTAGE) {
-                double percentageDiscount = cart.getTotalPrice() * voucher.getDiscountValue() / 100;
-                Double maxValue = voucher.getMaxDiscountValue();
-                discount = (maxValue != null) ? Math.min(percentageDiscount, maxValue) : percentageDiscount;
-            } else {
-                discount = voucher.getDiscountValue();
-            }
+        order.setTotal_price(cart.getTotalPrice() - order.getVoucherDiscount_price());
+        order.setOrderDetails(orderDetails);
 
-            order.setVoucherDiscount_price(cart.getTotalPrice() - discount);
+        cartRepository.delete(cart);
+
+        return orderMapper.toOrderResponse(orderRepository.save(order));
+    }
+
+    private void processVoucher(OrderRequest orderRequest, Cart cart, Order order) {
+        if (orderRequest.getVoucherCode() == null) {
+            return;
         }
 
+        Voucher voucher = voucherRepository.findByCode(orderRequest.getVoucherCode())
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_VOUCHER));
+
+        if (voucher.getMinOrderValue() > cart.getTotalPrice()) {
+            throw new AppException(ErrorCode.INELIGIBLE_FOR_DISCOUNT);
+        }
+
+        if (voucher.getQuantity() <= 0) {
+            throw new AppException(ErrorCode.VOUCHER_DEPLETED);
+        }
+
+        if (voucher.getEndDate().isBefore(orderRequest.getDate())) {
+            throw new AppException(ErrorCode.VOUCHER_EXPIRED);
+        }
+
+        double discount = calculateDiscount(voucher, cart.getTotalPrice());
+        order.setVoucherDiscount_price(discount);
+    }
+
+    private double calculateDiscount(Voucher voucher, double totalPrice) {
+        if (voucher.getDiscountType() == DiscountTypeEnum.PERCENTAGE) {
+            double percentageDiscount = totalPrice * voucher.getDiscountValue() / 100;
+            Double maxValue = voucher.getMaxDiscountValue();
+            return (maxValue != null) ? Math.min(percentageDiscount, maxValue) : percentageDiscount;
+        } else {
+            return voucher.getDiscountValue();
+        }
+    }
+
+    private List<OrderDetail> createOrderDetails(Cart cart, Order order) {
         List<OrderDetail> orderDetails = new ArrayList<>();
 
         orderDetails.add(OrderDetail.builder()
@@ -72,7 +97,7 @@ public class OrderService {
                 .order(order)
                 .build());
 
-        if(cart.getCartDiscountDetails() != null) {
+        if (cart.getCartDiscountDetails() != null) {
             cart.getCartDiscountDetails().forEach(detail -> {
                 orderDetails.add(OrderDetail.builder()
                         .order(order)
@@ -83,14 +108,17 @@ public class OrderService {
             });
         }
 
-        order.setUser(user);
-        order.setPaymentMethod(orderRequest.getPaymentMethod());
-        order.setTotal_price(cart.getTotalPrice()-order.getVoucherDiscount_price());
-        order.setOrderDetails(orderDetails);
-
-        cartRepository.delete(cart);
-        return orderMapper.toOrderResponse(orderRepository.save(order));
+        return orderDetails;
     }
 
+    private void updateInventory(List<OrderDetail> orderDetails) {
+        orderDetails.forEach(orderDetail -> {
+            ProductVariant variant = orderDetail.getProductVariant();
+            int quantity = orderDetail.getQuantity();
 
+            variant.setQuantity(variant.getQuantity() - quantity);
+            variant.getProduct().setStock_quantity(
+                    variant.getProduct().getStock_quantity() - quantity);
+        });
+    }
 }

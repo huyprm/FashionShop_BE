@@ -13,6 +13,7 @@ import org.ptithcm2021.fashionshop.exception.ErrorCode;
 import org.ptithcm2021.fashionshop.mapper.CartMapper;
 import org.ptithcm2021.fashionshop.model.*;
 import org.ptithcm2021.fashionshop.repository.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import javax.swing.text.html.Option;
@@ -33,8 +34,8 @@ public class CartService {
     private final CartMapper cartMapper;
 
     @Transactional
+    @PreAuthorize("#cartRequest.user_id== authentication.name")
     public CartResponse createCart(CartRequest cartRequest) {
-
         User user = userRepository.findById(cartRequest.getUser_id()).orElseThrow(()-> new AppException(ErrorCode.USER_NOT_FOUND));
 
         ProductVariant productVariant = productVariantRepository
@@ -102,6 +103,7 @@ public class CartService {
         }
         return "Cart deleted";
     }
+
     private DiscountDetail createCartDiscount(List<CartRequest.DiscountDetailRequest> discountDetailRequests, Cart cart, ProductVariant productVariant) {
 
         AtomicReference<Double> totalPrice = new AtomicReference<>((double) 0);

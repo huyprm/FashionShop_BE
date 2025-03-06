@@ -2,6 +2,7 @@ package org.ptithcm2021.fashionshop.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import lombok.*;
 import org.ptithcm2021.fashionshop.enums.ProductStatusEnum;
 
@@ -30,6 +31,8 @@ public class Product {
     private String thumbnail;
 
     private String price;
+
+    @Min(value = 0, message = "Quantity must be greater than or equal to 0.")
     private int stock_quantity;
 
     @Column

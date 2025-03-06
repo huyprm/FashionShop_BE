@@ -61,14 +61,14 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 );
 
-//        http.cors(cors -> cors.configurationSource(request -> {
-//            CorsConfiguration config = new CorsConfiguration();
-//            config.setAllowedOrigins(List.of("http://localhost:3000")); // Chỉ frontend này được truy cập
-//            config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
-//            config.setAllowedHeaders(List.of("*"));
-//            config.setAllowCredentials(true);
-//            return config;
-//        }));
+        http.cors(cors -> cors.configurationSource(request -> {
+            CorsConfiguration config = new CorsConfiguration();
+            config.setAllowedOrigins(List.of("http://localhost:5500")); // Chỉ frontend này được truy cập
+            config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
+            config.setAllowedHeaders(List.of("*"));
+            config.setAllowCredentials(true);
+            return config;
+        }));
 
         http.oauth2ResourceServer(oauth2 -> oauth2
                 .jwt(jwtConfigurer -> jwtConfigurer.decoder(jwtDecoder()))

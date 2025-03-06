@@ -1,5 +1,8 @@
 package org.ptithcm2021.fashionshop.controller;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +14,7 @@ import org.ptithcm2021.fashionshop.exception.AppException;
 import org.ptithcm2021.fashionshop.model.User;
 import org.ptithcm2021.fashionshop.repository.UserRepository;
 import org.ptithcm2021.fashionshop.service.AuthenticationService;
+import org.springframework.data.repository.query.Param;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,40 +28,31 @@ public class AuthenticationController {
     private final UserRepository userRepository;
 
     @PostMapping("/login")
-    public ApiResponse<AuthenticationResponse> login(@RequestBody @Valid LoginRequest loginRequest) throws Exception {
+    public ApiResponse<String> login(@RequestBody @Valid LoginRequest loginRequest, HttpServletResponse response) throws Exception {
         AuthenticationResponse authenticationResponse = authenticationService.login(loginRequest);
 
-        return ApiResponse.<AuthenticationResponse>builder()
-                .data(authenticationResponse)
+        response.addCookie(authenticationResponse.getCookie());
+        return ApiResponse.<String>builder()
+                .data(authenticationResponse.getAccessToken())
                 .build();
     }
+
     @PostMapping("/refresh")
-    public ApiResponse<AuthenticationResponse> refreshToken(@RequestBody String refreshToken, String mail) throws Exception {
+    public ApiResponse<String> refreshToken(@CookieValue (name = "refreshToken", required = false)String request, HttpServletResponse response, @RequestParam String userId) throws Exception {
+        AuthenticationResponse authenticationResponse = authenticationService.refreshToken(request, userId);
 
-        if (!authenticationService.verifyToken(refreshToken))
-            throw new AppException(ErrorCode.INVALID_JWT);
-        User user = userRepository.findByEmail(mail).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-
-        //check token revoked
-        if(!user.getRefreshToken().equals(refreshToken)) throw new AppException(ErrorCode.INVALID_JWT);
-
-        String refresh = authenticationService.generateRefreshToken(user);
-        user.setRefreshToken(refreshToken);
-        userRepository.save(user);
-
-        AuthenticationResponse authenticationResponse = AuthenticationResponse.builder()
-                .accessToken(authenticationService.generateAccessToken(user))
-                .refreshToken(refresh)
-                .build();
-
-        return ApiResponse.<AuthenticationResponse>builder()
-                .data(authenticationResponse)
+        response.addCookie(authenticationResponse.getCookie());
+        return ApiResponse.<String>builder()
+                .data(authenticationResponse.getAccessToken())
                 .build();
     }
+
     @GetMapping("/logout")
-    public ApiResponse<String> logout() throws Exception {
+    public ApiResponse<String> logout(HttpServletResponse response) throws Exception {
         var authen= SecurityContextHolder.getContext().getAuthentication();
-        authenticationService.handleRefreshToken(authen.getName());
+
+        response.addCookie(authenticationService.logout(authen.getName()));
+
         return ApiResponse.<String>builder().data("Success").build();
     }
 
@@ -72,4 +67,6 @@ public class AuthenticationController {
         authenticationService.sendVerificationEmail(email);
         return ApiResponse.<Void>builder().build();
     }
+
+
 }
