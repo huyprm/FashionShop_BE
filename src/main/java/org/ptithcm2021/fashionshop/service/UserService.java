@@ -15,6 +15,7 @@ import org.ptithcm2021.fashionshop.model.Role;
 import org.ptithcm2021.fashionshop.model.User;
 import org.ptithcm2021.fashionshop.repository.RoleRepository;
 import org.ptithcm2021.fashionshop.repository.UserRepository;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -83,6 +84,7 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @Cacheable(value = "users", key = "#id")
     public UserResponse getUser(String id) {
         User user = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         return userMapper.toUserResponse(user);

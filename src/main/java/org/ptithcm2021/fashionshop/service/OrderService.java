@@ -30,8 +30,13 @@ public class OrderService {
     @Transactional
     @PreAuthorize("#id == authentication.name")
     public OrderResponse createOrder(OrderRequest orderRequest, String id) {
-        Cart cart = cartRepository.findById(orderRequest.getCartId())
-                .orElseThrow(() -> new AppException(ErrorCode.CART_NOT_FOUND));
+        List<Cart> carts= new ArrayList<>();
+        orderRequest.getCartId().forEach(integer -> {
+            Cart cart = cartRepository.findById(integer)
+                    .orElseThrow(() -> new AppException(ErrorCode.CART_NOT_FOUND));
+
+            carts.add(cart);
+        });
 
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
@@ -39,25 +44,29 @@ public class OrderService {
         Order order = orderMapper.toOrder(orderRequest);
         order.setUser(user);
         order.setPaymentMethod(orderRequest.getPaymentMethod());
+        order.setVoucherDiscount_price(0);
 
-        processVoucher(orderRequest, cart, order);
 
-        List<OrderDetail> orderDetails = createOrderDetails(cart, order);
+        processVoucher(orderRequest, carts, order);
+
+        List<OrderDetail> orderDetails = createOrderDetails(carts, order);
         updateInventory(orderDetails);
 
-        order.setTotal_price(cart.getTotalPrice() - order.getVoucherDiscount_price());
+        double total = carts.stream().mapToDouble(Cart::getTotalPrice).sum();
+        order.setTotal_price(total - order.getVoucherDiscount_price());
         order.setOrderDetails(orderDetails);
 
-        cartRepository.delete(cart);
+        cartRepository.deleteAll(carts);
 
         return orderMapper.toOrderResponse(orderRepository.save(order));
     }
 
-    private void processVoucher(OrderRequest orderRequest, Cart cart, Order order) {
+    private void processVoucher(OrderRequest orderRequest, List<Cart> carts, Order order) {
         if (orderRequest.getVoucherCode() == null) {
             return;
         }
 
+        carts.forEach(cart -> {
         Voucher voucher = voucherRepository.findByCode(orderRequest.getVoucherCode())
                 .orElseThrow(() -> new AppException(ErrorCode.INVALID_VOUCHER));
 
@@ -74,8 +83,10 @@ public class OrderService {
         }
 
         double discount = calculateDiscount(voucher, cart.getTotalPrice());
-        order.setVoucherDiscount_price(discount);
+        order.setVoucherDiscount_price(order.getVoucherDiscount_price() +discount);
+    });
     }
+
 
     private double calculateDiscount(Voucher voucher, double totalPrice) {
         if (voucher.getDiscountType() == DiscountTypeEnum.PERCENTAGE) {
@@ -87,27 +98,28 @@ public class OrderService {
         }
     }
 
-    private List<OrderDetail> createOrderDetails(Cart cart, Order order) {
+    private List<OrderDetail> createOrderDetails(List<Cart> carts, Order order) {
         List<OrderDetail> orderDetails = new ArrayList<>();
 
-        orderDetails.add(OrderDetail.builder()
-                .productVariant(cart.getProductVariant())
-                .quantity(cart.getQuantity())
-                .price(cart.getProductVariant().getPrice())
-                .order(order)
-                .build());
+        carts.forEach(cart -> {
+            orderDetails.add(OrderDetail.builder()
+                    .productVariant(cart.getProductVariant())
+                    .quantity(cart.getQuantity())
+                    .price(cart.getProductVariant().getPrice())
+                    .order(order)
+                    .build());
 
-        if (cart.getCartDiscountDetails() != null) {
-            cart.getCartDiscountDetails().forEach(detail -> {
-                orderDetails.add(OrderDetail.builder()
-                        .order(order)
-                        .productVariant(detail.getProductVariant())
-                        .quantity(detail.getQuantity())
-                        .price(detail.getPrice())
-                        .build());
-            });
-        }
-
+            if (cart.getCartDiscountDetails() != null) {
+                cart.getCartDiscountDetails().forEach(detail -> {
+                    orderDetails.add(OrderDetail.builder()
+                            .order(order)
+                            .productVariant(detail.getProductVariant())
+                            .quantity(detail.getQuantity())
+                            .price(detail.getPrice())
+                            .build());
+                });
+            }
+        });
         return orderDetails;
     }
 

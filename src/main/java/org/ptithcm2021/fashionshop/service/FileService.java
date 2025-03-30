@@ -1,6 +1,7 @@
 package org.ptithcm2021.fashionshop.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.FilteredObjectInputStream;
 import org.ptithcm2021.fashionshop.configure.StorageProperties;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import java.util.List;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
+@Slf4j
 @Service
 public class FileService {
     private final Path location;
@@ -35,8 +37,11 @@ public class FileService {
     public void init(String imageType){
         try{
             Path path = Paths.get(location.toAbsolutePath().toString(), imageType);
-            Files.createDirectories(path);
+            if (!Files.exists(path)) {
+                Files.createDirectories(path);
+            }
         } catch (IOException e) {
+            log.info(e.toString());
             throw new RuntimeException("Could not initialize storage", e);
         }
     }
@@ -59,13 +64,15 @@ public class FileService {
         return imageType + "/"+ fileName;
     }
 
-    public InputStreamResource loadFile(String imageType, String fileName) throws FileNotFoundException {
-        Path path = Paths.get(String.valueOf(location), imageType, fileName);
-
+    public InputStreamResource loadFile(String fileName, String imageType) throws FileNotFoundException {
+        Path path = Paths.get(location.toString(), imageType, fileName); // Đảm bảo location là chuỗi hợp lệ
         File file = path.toFile();
-        InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
 
-        return resource;
+        if (!file.exists()) {
+            throw new FileNotFoundException("File not found: " + file.getAbsolutePath());
+        }
+
+        return new InputStreamResource(new FileInputStream(file));
     }
 
     public void deleteFile(String imageType, String fileName) {

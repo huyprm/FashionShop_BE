@@ -17,4 +17,5 @@ public class ProductVariantResponse {
     private String image;
     private String color;
     private String size;
+    private int productId;
 }

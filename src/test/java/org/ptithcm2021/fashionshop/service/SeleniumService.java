@@ -21,7 +21,7 @@ import static org.testng.AssertJUnit.assertNotNull;
 public class SeleniumService {
     private final WebDriver webDriver;
 
-    @Before
+    //@Before
     public void setup(){
         webDriver.get("http://localhost:8080");
         

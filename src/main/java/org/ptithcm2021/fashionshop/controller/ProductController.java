@@ -32,8 +32,7 @@ public class ProductController {
 
     @PostMapping(value = "/create")
     public ApiResponse<ProductResponse> creatProductVariant(
-            @RequestBody @Valid ProductRequest request)
-     {
+            @RequestBody @Valid ProductRequest request) {
         return ApiResponse.<ProductResponse>builder()
                 .data(productService.addProduct(request))
                 .build();
@@ -120,4 +119,5 @@ public class ProductController {
         return ApiResponse.<Map<Integer, String>>builder()
                 .data(productService.searchProduct(data)).build();
     }
+
 }

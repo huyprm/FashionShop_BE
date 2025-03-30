@@ -3,6 +3,7 @@ package org.ptithcm2021.fashionshop;
 import org.ptithcm2021.fashionshop.dto.request.EmailRequest;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 

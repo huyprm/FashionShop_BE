@@ -7,6 +7,7 @@ import org.ptithcm2021.fashionshop.dto.response.ProductResponse;
 import org.ptithcm2021.fashionshop.model.Product;
 
 @Mapper(componentModel = "spring", uses = {BundleDiscountMapper.class})
+
 public interface ProductMapper {
     Product toProduct(ProductRequest product);
 

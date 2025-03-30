@@ -1,5 +1,6 @@
 package org.ptithcm2021.fashionshop.controller;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -14,6 +15,9 @@ import org.ptithcm2021.fashionshop.exception.AppException;
 import org.ptithcm2021.fashionshop.model.User;
 import org.ptithcm2021.fashionshop.repository.UserRepository;
 import org.ptithcm2021.fashionshop.service.AuthenticationService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.repository.query.Param;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -30,7 +34,6 @@ public class AuthenticationController {
     @PostMapping("/login")
     public ApiResponse<String> login(@RequestBody @Valid LoginRequest loginRequest, HttpServletResponse response) throws Exception {
         AuthenticationResponse authenticationResponse = authenticationService.login(loginRequest);
-
         response.addCookie(authenticationResponse.getCookie());
         return ApiResponse.<String>builder()
                 .data(authenticationResponse.getAccessToken())
@@ -68,5 +71,13 @@ public class AuthenticationController {
         return ApiResponse.<Void>builder().build();
     }
 
+    @PostMapping("/sendOTP")
+    public ApiResponse<String> sendOTP(@RequestParam String email){
+        return ApiResponse.<String>builder().data(authenticationService.generateOTP(email)).build();
+    }
 
+    @PostMapping("/verifyOTP")
+    public ApiResponse<Boolean> verifyOTP(@RequestParam String email, @RequestParam String otp){
+        return ApiResponse.<Boolean>builder().data(authenticationService.verifyOTP(email, otp)).build();
+    }
 }

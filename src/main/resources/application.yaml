@@ -1,4 +1,15 @@
 spring:
+  data:
+    redis:
+      host: redis-18620.c1.ap-southeast-1-1.ec2.redns.redis-cloud.com
+      port: 18620
+      username: default
+      password: iJA8gzweshOAnISRVc4GmX5CoXClxoRZ
+      ssl:
+        enabled: true
+  cache:
+    type: redis
+
   docker:
     compose:
       enabled: false
@@ -8,7 +19,7 @@ spring:
     url: "jdbc:mysql://localhost:3306/fashion_shop"
     driver-class-name: com.mysql.jdbc.Driver
     username: root
-    password: 12345
+    password: root
   jpa:
     hibernate:
       ddl-auto: update
@@ -33,20 +44,19 @@ spring:
             enable: true
   web:
     resources:
-      static-locations: E:\\Java\\FashionShop\\images
-
-springdoc:
-  swagger-ui:
-    path: /swagger-ui.html
-    enabled: true
-  api-docs:
-    path: /v3/api-docs
+      static-locations: D:\\Java\\FashionShop\\images
+#springdoc:
+#  swagger-ui:
+#    path: /swagger-ui.html
+#    enabled: true
+#  api-docs:
+#    path: /v3/api-docs
 
 jwt:
   signerKey: "Nl0EwgZ2zY7r2lfXYJOUguERWZkvn3KDPu6pK+9EWFMsqCfywwzmhViCGawL2qQN"
 
 storage:
-  location: E:\\Java\\FashionShop\\images
+  location: D:\\Java\\FashionShop\\images
 
 VNPay:
   vnp_PayUrl: "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"

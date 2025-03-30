@@ -6,6 +6,8 @@ import lombok.*;
 import org.ptithcm2021.fashionshop.enums.PaymentMethodEnum;
 
 import java.time.LocalDateTime;
+import java.util.List;
+
 @Setter
 @Getter
 @AllArgsConstructor
@@ -13,7 +15,7 @@ import java.time.LocalDateTime;
 @Builder
 public class OrderRequest {
     @NotNull
-    private int cartId;
+    private List<Integer> cartId;
 
     @NotNull
     private LocalDateTime date;

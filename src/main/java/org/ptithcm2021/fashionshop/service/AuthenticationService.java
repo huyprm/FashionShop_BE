@@ -21,13 +21,20 @@ import org.ptithcm2021.fashionshop.model.User;
 import org.ptithcm2021.fashionshop.repository.UserRepository;
 import org.ptithcm2021.fashionshop.util.MailUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.Cache;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.Objects;
+import java.util.Random;
 import java.util.UUID;
 
 @Slf4j
@@ -40,6 +47,7 @@ public class AuthenticationService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final MailUtils mailUtils;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     public AuthenticationResponse login (LoginRequest loginRequest) throws Exception {
         String emailRegex = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$";
@@ -197,5 +205,31 @@ public class AuthenticationService {
                 .accessToken(generateAccessToken(user))
                 .cookie(createCookie(refresh, 86400))
                 .build();
+    }
+
+    public String generateOTP(String email){
+        Random random = new Random();
+        int otp = 100000 + random.nextInt(900000);
+        redisTemplate.opsForValue().set("otp:"+email, otp, Duration.ofMinutes(5));
+        return String.valueOf(otp);
+    }
+
+    public String getOtpFromCache(String email) {
+        return Objects.requireNonNull(redisTemplate.opsForValue().get("otp:" + email)).toString();
+    }
+
+
+    public void evictOtp(String email) {
+        redisTemplate.delete("otp:"+email);
+    }
+
+    public boolean verifyOTP(String email, String otp){
+        String storedOtp = getOtpFromCache(email);
+
+        if(otp.equals(storedOtp) || storedOtp !=null ){
+            evictOtp(email); // Xóa OTP sau khi xác minh
+            return true;
+        }
+        return false;
     }
 }
