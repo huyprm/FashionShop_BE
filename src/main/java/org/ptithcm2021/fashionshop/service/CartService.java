@@ -63,6 +63,7 @@ public class CartService {
         return cartMapper.toCartResponse(cartRepository.save(cart));
     }
 
+    @PreAuthorize("#request.userId == authentication.name")
     public CartResponse updateCart(CartUpdateRequest request) {
         Cart cart = cartRepository.findById(request.getCartId()).orElseThrow(() -> new RuntimeException("Cart not found"));
 
@@ -87,18 +88,25 @@ public class CartService {
         return cartMapper.toCartResponse(cartRepository.save(cart));
     }
 
+    @PreAuthorize("#userId == authentication.name")
     public List<CartResponse> getCartByUserId(String userId) {
 
         List<Cart> carts = cartRepository.findByUserId(userId).orElseThrow(() -> new RuntimeException("Cart not found"));
-        return carts.stream().map(cart -> cartMapper.toCartResponse(cart)).collect(Collectors.toList());
+        return carts.stream().map(cartMapper::toCartResponse).collect(Collectors.toList());
     }
 
 
     @Transactional
     public String deleteCart(int id, String type) {
-        if(type.equals("main")){
+        if ("main".equals(type)) { // Tránh NullPointerException
+            if (!cartRepository.existsById(id)) {
+                throw new RuntimeException("Cart with ID " + id + " not found.");
+            }
             cartRepository.deleteById(id);
         } else {
+            if (!cartDetailRepository.existsById(id)) {
+                throw new RuntimeException("Cart detail with ID " + id + " not found.");
+            }
             cartDetailRepository.deleteById(id);
         }
         return "Cart deleted";

@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.ptithcm2021.fashionshop.dto.request.OrderRequest;
 import org.ptithcm2021.fashionshop.dto.response.OrderResponse;
 import org.ptithcm2021.fashionshop.enums.DiscountTypeEnum;
+import org.ptithcm2021.fashionshop.enums.OrderStatusEnum;
 import org.ptithcm2021.fashionshop.exception.AppException;
 import org.ptithcm2021.fashionshop.exception.ErrorCode;
 import org.ptithcm2021.fashionshop.mapper.OrderMapper;
@@ -27,14 +28,39 @@ public class OrderService {
     private final CartRepository cartRepository;
     private final VoucherRepository voucherRepository;
 
-    @Transactional
+    @PreAuthorize("#userId == authentication.name")
+    public void cancelOrder (long orderId, String userId){
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        order.setStatus(OrderStatusEnum.CANCELLED);
+        orderRepository.save(order);
+    }
+
+    @PreAuthorize("#userId == authentication.name")
+    public OrderResponse getOrder(long orderId, String userId){
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found"));
+
+        return orderMapper.toOrderResponse(order);
+    }
+
+    @PreAuthorize("#userId == authentication.name")
+    public List<OrderResponse> getOrderByStatus(String userId, OrderStatusEnum status){
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        return user.getOrders().stream().filter(order -> order.getStatus().equals(status)).map(orderMapper::toOrderResponse).toList();
+    }
+
     @PreAuthorize("#id == authentication.name")
+    @Transactional
     public OrderResponse createOrder(OrderRequest orderRequest, String id) {
         List<Cart> carts= new ArrayList<>();
         orderRequest.getCartId().forEach(integer -> {
             Cart cart = cartRepository.findById(integer)
                     .orElseThrow(() -> new AppException(ErrorCode.CART_NOT_FOUND));
-
+            if( cart.getProductVariant().getQuantity() < cart.getQuantity()) throw new RuntimeException("Out of stock");
             carts.add(cart);
         });
 
@@ -57,8 +83,12 @@ public class OrderService {
         order.setOrderDetails(orderDetails);
 
         cartRepository.deleteAll(carts);
-
-        return orderMapper.toOrderResponse(orderRepository.save(order));
+        try {
+            Order order1 = orderRepository.save(order);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return orderMapper.toOrderResponse(order);
     }
 
     private void processVoucher(OrderRequest orderRequest, List<Cart> carts, Order order) {
@@ -102,6 +132,7 @@ public class OrderService {
         List<OrderDetail> orderDetails = new ArrayList<>();
 
         carts.forEach(cart -> {
+
             orderDetails.add(OrderDetail.builder()
                     .productVariant(cart.getProductVariant())
                     .quantity(cart.getQuantity())
