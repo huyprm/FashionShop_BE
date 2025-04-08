@@ -65,6 +65,7 @@ public class CartService {
 
     @PreAuthorize("#request.userId == authentication.name")
     public CartResponse updateCart(CartUpdateRequest request) {
+        System.out.println("Received Cart ID in request: " + request.getCartId());
         Cart cart = cartRepository.findById(request.getCartId()).orElseThrow(() -> new RuntimeException("Cart not found"));
 
         double totalPrice = 0;

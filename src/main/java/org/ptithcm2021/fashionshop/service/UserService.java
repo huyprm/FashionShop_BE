@@ -15,6 +15,7 @@ import org.ptithcm2021.fashionshop.model.Role;
 import org.ptithcm2021.fashionshop.model.User;
 import org.ptithcm2021.fashionshop.repository.RoleRepository;
 import org.ptithcm2021.fashionshop.repository.UserRepository;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -39,8 +40,11 @@ public class UserService {
     private final FileService fileService;
 
     public UserResponse createUser(UserRegisterRequest userRegisterRequest) throws Exception {
-        User user = userMapper.toUser(userRegisterRequest);
 
+        if (userRepository.findByEmail(userRegisterRequest.getEmail()).isPresent()) {
+            throw new AppException(ErrorCode.USER_ALREADY_EXISTS);
+        }
+        User user = userMapper.toUser(userRegisterRequest);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         user.setStatus(AccountStatusEnum.PENDING);
         user.setRefreshToken(authenticationService.generateRefreshToken(user));
@@ -125,6 +129,7 @@ public class UserService {
     }
 
     @PreAuthorize("#id == authentication.name")
+    @CachePut(value = "users", key = "#id")
     public UserResponse updateAvatar(MultipartFile file, String id) throws UnsupportedEncodingException {
         User user = userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 

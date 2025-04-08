@@ -23,7 +23,6 @@ public class BundleDiscountResponse {
     private int id;
     private String bundledProduct_name;
     private String bundledProduct_thumbnail;
-    //private List<ProductVariantResponse> productVariantResponseList;
     private DiscountTypeEnum discountType;
     private double discountValue;
     private LocalDateTime startDate;

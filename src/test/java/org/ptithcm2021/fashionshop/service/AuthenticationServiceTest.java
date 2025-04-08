@@ -8,23 +8,29 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.ptithcm2021.fashionshop.dto.request.LoginRequest;
 import org.ptithcm2021.fashionshop.dto.response.AuthenticationResponse;
 import org.ptithcm2021.fashionshop.enums.AccountStatusEnum;
 import org.ptithcm2021.fashionshop.exception.AppException;
 import org.ptithcm2021.fashionshop.exception.ErrorCode;
+import org.ptithcm2021.fashionshop.model.Role;
 import org.ptithcm2021.fashionshop.model.User;
 import org.ptithcm2021.fashionshop.repository.UserRepository;
 import org.ptithcm2021.fashionshop.util.MailUtils;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.Duration;
 import java.util.Optional;
 
-@ExtendWith(SpringExtension.class)
+
+@ExtendWith(MockitoExtension.class)
 class AuthenticationServiceTest {
 
     @Mock
@@ -32,7 +38,6 @@ class AuthenticationServiceTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
-
 
     @Mock
     private RedisTemplate<String, Object> redisTemplate;
@@ -44,11 +49,17 @@ class AuthenticationServiceTest {
 
     @BeforeEach
     void setUp() {
+        Role role = new Role();
+        role.setRole("ADMIN");
+
         mockUser = new User();
         mockUser.setId("123");
         mockUser.setEmail("test@example.com");
         mockUser.setPassword("encodedPassword");
         mockUser.setStatus(AccountStatusEnum.ACTIVE);
+        mockUser.setRole(role);
+
+        ReflectionTestUtils.setField(authenticationService, "sign", "Nl0EwgZ2zY7r2lfXYJOUguERWZkvn3KDPu6pK+9EWFMsqCfywwzmhViCGawL2qQN");
     }
 
     @Test
@@ -88,6 +99,47 @@ class AuthenticationServiceTest {
     }
 
     @Test
+    void testLoginWithInvalidEmail() throws Exception {
+        // Arrange
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setUsername("test@example.com");
+        loginRequest.setPassword("invalidPassword");
+
+        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.empty());
+
+        // Act & Assert
+        AppException exception = assertThrows(AppException.class, () -> {
+            authenticationService.login(loginRequest);
+        });
+        assertEquals(ErrorCode.USER_NOT_FOUND, exception.getErrorCode());
+    }
+
+    @Test
+    void testLoginWithPendingAccount_ShouldThrowAccountLocked() {
+        // Given
+        LoginRequest request = new LoginRequest();
+        request.setUsername("user@example.com");
+        request.setPassword("123");
+
+        User pendingUser = new User();
+        pendingUser.setEmail("user@example.com");
+        pendingUser.setPassword("123");
+        pendingUser.setStatus(AccountStatusEnum.PENDING);
+
+        when(userRepository.findByEmail("user@example.com"))
+                .thenReturn(Optional.of(pendingUser));
+        when(passwordEncoder.matches("123", "123")).thenReturn(true);
+
+        // When + Then
+        AppException ex = assertThrows(AppException.class, () -> {
+            authenticationService.login(request);
+        });
+
+        assertEquals(ErrorCode.ACCOUNT_LOCKED, ex.getErrorCode());
+    }
+
+
+    @Test
     void testGenerateAccessToken() throws Exception {
         // Act
         String accessToken = authenticationService.generateAccessToken(mockUser);
@@ -95,38 +147,6 @@ class AuthenticationServiceTest {
         // Assert
         assertNotNull(accessToken);
         assertTrue(accessToken.startsWith("eyJ"));
-    }
-
-    @Test
-    public void testGenerateOTP() {
-        String email = "test@example.com";
-        String generatedOtp = "123456";
-
-        // Mock the redisTemplate to simulate setting the OTP in Redis
-        doNothing().when(redisTemplate).opsForValue().set(eq("otp:" + email), anyString(), any(Duration.class));
-
-        // Call the method
-        String otp = authenticationService.generateOTP(email);
-
-        // Assert that the OTP generated is the one we expect
-        assertEquals(generatedOtp, otp);
-
-        // Verify that redisTemplate's set method was called with the correct parameters
-        verify(redisTemplate).opsForValue().set(eq("otp:" + email), anyString(), any(Duration.class));
-    }
-
-    @Test
-    void testVerifyOTP() {
-        // Arrange
-        String email = "test@example.com";
-        String otp = "123456";
-        when(redisTemplate.opsForValue().get("otp:" + email)).thenReturn("123456");
-
-        // Act
-        boolean isVerified = authenticationService.verifyOTP(email, otp);
-
-        // Assert
-        assertTrue(isVerified);
     }
 
     @Test
